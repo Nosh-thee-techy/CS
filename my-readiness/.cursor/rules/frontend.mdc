@@ -1,0 +1,18 @@
+---
+description: Frontend conventions for the My Readiness PWA
+globs: frontend/**/*.{js,jsx,css,json}
+alwaysApply: false
+---
+
+# Frontend
+
+React (Vite) + Tailwind + react-i18next. App-like mobile web, not a marketing site.
+
+- Screens in `frontend/src/screens/`; shared UI in `frontend/src/components/`
+- All user-facing strings via i18n keys (`en` + `sw`). No hardcoded English.
+- Persist locale in `localStorage`. Call backend with `?lang=`
+- Bottom nav: Score / Actions / Advisory. Lookup has no nav.
+- Strengths & gaps live on the Score tab
+- Cache last-viewed profile for flaky networks; show it if the live call fails
+- Kali greeting: play `voiceGreetingUrl` when present; else speak `voiceGreetingText`
+- Self-report checkboxes call `POST /api/readiness/:lookup/actions/:id/complete` only

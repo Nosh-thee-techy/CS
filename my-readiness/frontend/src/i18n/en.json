@@ -1,0 +1,64 @@
+{
+  "app": {
+    "name": "My Readiness",
+    "coop": "KaLI Coop",
+    "kali": "Kali"
+  },
+  "splash": {
+    "tap": "Tap to continue"
+  },
+  "lookup": {
+    "kicker": "KaLI Coop",
+    "headline": "Your credit at a glance",
+    "sub": "No login needed. Enter your member number, phone, or national ID.",
+    "placeholder": "Member no. / phone / ID",
+    "button": "Check my score",
+    "checking": "Looking you up…",
+    "hint": "Try KTDA-43456789, 0712345678, or 12345678",
+    "language": "Language"
+  },
+  "nav": {
+    "score": "Score",
+    "actions": "Actions",
+    "advisory": "Advisory"
+  },
+  "score": {
+    "yourScore": "Your score",
+    "why": "Why this score",
+    "strengths": "What's helping",
+    "gaps": "What's holding you back",
+    "changeFarmer": "Look up someone else",
+    "offline": "Showing the last score we saved on this phone."
+  },
+  "voice": {
+    "play": "Play Kali greeting",
+    "playing": "Kali is speaking…",
+    "replay": "Play again"
+  },
+  "actions": {
+    "title": "Your next steps",
+    "selfReportNote": "Ticking a box reports progress for your field officer to verify. It does not change your score today.",
+    "verified": "Verified",
+    "pending": "Waiting for officer",
+    "report": "I have done this",
+    "reported": "Reported — waiting for verification",
+    "success": "Reported. An officer will verify. Your score stays the same today.",
+    "error": "Could not send the report. Try again when you have signal."
+  },
+  "advisory": {
+    "title": "Climate advisory",
+    "zoneHint": "Advice for your farming zone this week.",
+    "disbursement": "Disbursement",
+    "eligible": "You are in the credit-ready band. Ask your officer about disbursement.",
+    "notEligible": "Not yet eligible for disbursement. Follow the action list to get there."
+  },
+  "bands": {
+    "credit_ready": "Credit ready",
+    "almost_there": "Almost there",
+    "building_trust": "Building trust"
+  },
+  "errors": {
+    "notFound": "We could not find that member. Check the number and try again.",
+    "network": "No connection. If you checked a score before, we will show the saved one."
+  }
+}

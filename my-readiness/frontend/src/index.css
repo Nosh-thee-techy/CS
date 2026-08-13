@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: Inter, "SF Pro Display", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tap {
+  min-height: 52px;
+  min-width: 44px;
+}
+
+.btn-pill {
+  @apply tap flex h-14 w-full items-center justify-center rounded-full text-[17px] font-semibold transition active:scale-[0.99];
+}
+
+.btn-pill-white {
+  @apply btn-pill bg-white text-black;
+}
+
+.btn-pill-ember {
+  @apply btn-pill bg-ember text-white shadow-glow;
+  background-image: linear-gradient(90deg, #c2410c 0%, #ea580c 45%, #fb923c 100%);
+}
+
+.glass-pill {
+  @apply rounded-full border border-white/10 bg-white/10 text-sm font-medium text-white backdrop-blur;
+}
+
+.panel {
+  @apply rounded-[24px] bg-panel shadow-card;
+}
+
+.orange-glow {
+  background: radial-gradient(ellipse at center, rgba(255, 92, 42, 0.35), transparent 68%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "app": {
+    "name": "Utayari Wangu",
+    "coop": "KaLI Coop",
+    "kali": "Kali"
+  },
+  "splash": {
+    "tap": "Gusa kuendelea"
+  },
+  "lookup": {
+    "kicker": "KaLI Coop",
+    "headline": "Alama yako kwa mtazamo",
+    "sub": "Hauhitaji kuingia. Weka namba ya mwanachama, simu, au kitambulisho.",
+    "placeholder": "Namba ya mwanachama / simu / kitambulisho",
+    "button": "Angalia alama yangu",
+    "checking": "Tunakutafuta…",
+    "hint": "Jaribu KTDA-43456789, 0712345678, au 12345678",
+    "language": "Lugha"
+  },
+  "nav": {
+    "score": "Alama",
+    "actions": "Hatua",
+    "advisory": "Ushauri"
+  },
+  "score": {
+    "yourScore": "Alama yako",
+    "why": "Kwa nini alama hii",
+    "strengths": "Kinachokusaidia",
+    "gaps": "Kinachokuzuia",
+    "changeFarmer": "Tafuta mwanachama mwingine",
+    "offline": "Tunaonyesha alama ya mwisho iliyohifadhiwa kwenye simu hii."
+  },
+  "voice": {
+    "play": "Cheza salamu ya Kali",
+    "playing": "Kali anazungumza…",
+    "replay": "Cheza tena"
+  },
+  "actions": {
+    "title": "Hatua zako zijazo",
+    "selfReportNote": "Kutia alama kunaripoti maendeleo kwa afisa wako kuthibitisha. Haibadilishi alama yako leo.",
+    "verified": "Imethibitishwa",
+    "pending": "Inasubiri afisa",
+    "report": "Nimefanya hivi",
+    "reported": "Imeripotiwa — inasubiri uthibitisho",
+    "success": "Imeripotiwa. Afisa atathibitisha. Alama yako inabaki ile ile leo.",
+    "error": "Ripoti haikutumwa. Jaribu tena ukiwa na mtandao."
+  },
+  "advisory": {
+    "title": "Ushauri wa hali ya hewa",
+    "zoneHint": "Ushauri wa eneo lako la kilimo wiki hii.",
+    "disbursement": "Malipo",
+    "eligible": "Uko katika kundi la tayari kwa mkopo. Uliza afisa wako kuhusu malipo.",
+    "notEligible": "Bado hufai kupokea malipo. Fuata orodha ya hatua kufika huko."
+  },
+  "bands": {
+    "credit_ready": "Tayari kwa mkopo",
+    "almost_there": "Karibu kufika",
+    "building_trust": "Tunajenga imani"
+  },
+  "errors": {
+    "notFound": "Hatukumpata mwanachama huyo. Kagua namba na ujaribu tena.",
+    "network": "Hakuna mtandao. Ikiwa umeangalia alama kabla, tutaonyesha iliyohifadhiwa."
+  }
+}

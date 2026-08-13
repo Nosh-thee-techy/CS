@@ -1,0 +1,18 @@
+{
+  "name": "My Readiness",
+  "short_name": "Readiness",
+  "description": "Check your KaLI Coop credit readiness score.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
