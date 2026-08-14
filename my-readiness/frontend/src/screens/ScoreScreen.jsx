@@ -6,6 +6,8 @@ import PillButton from "../components/PillButton.jsx";
 import { useReadiness } from "../context/ReadinessContext.jsx";
 import StrengthsGaps from "./StrengthsGaps.jsx";
 
+import ClimateHeatmapCard from "../components/ClimateHeatmapCard.jsx";
+
 export default function ScoreScreen() {
   const { t, i18n } = useTranslation();
   const { profile, fromCache, reset, setTab } = useReadiness();
@@ -55,18 +57,7 @@ export default function ScoreScreen() {
         </p>
       )}
 
-      <article className="overflow-hidden rounded-[24px] border border-white/15 bg-panel">
-        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-ember/20 text-ember-glow">
-            <CloudIcon />
-          </span>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mute">{t("score.climate")}</p>
-            <p className="text-sm font-semibold text-white">{t("score.climateStay")}</p>
-          </div>
-        </div>
-        <p className="px-4 py-4 text-[16px] leading-relaxed text-white">{profile.climateAdvisory}</p>
-      </article>
+      <ClimateHeatmapCard profile={profile} />
 
       <article className="overflow-hidden rounded-[24px] border border-white/10 bg-panel">
         <div className="flex gap-3 p-4">
