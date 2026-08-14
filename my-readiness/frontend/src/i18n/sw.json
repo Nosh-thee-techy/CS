@@ -49,7 +49,9 @@
     "offline": "Tunaonyesha data iliyohifadhiwa, huenda si ya sasa.",
     "updated": "Ilisasishwa",
     "climate": "Ushauri wa hali ya hewa",
-    "climateStay": "Fuata huu kwa eneo lako msimu huu"
+    "climateStay": "Fuata huu kwa eneo lako msimu huu",
+    "applyCta": "Omba KES {{amount}}",
+    "loanTab": "Fungua mkopo"
   },
   "voice": {
     "play": "Cheza salamu ya Kali",
@@ -132,12 +134,13 @@
       "1": "Tunaonyesha kiasi unachostahili kutokana na alama yako ya sasa.",
       "2": "Unachagua kiasi unachotaka — hadi kikomo hicho.",
       "3": "Unasema pesa ni kwa ajili ya nini.",
-      "4": "Thibitisha kwa namba ya SMS. Kisha ushirika unaangalia ombi."
+      "4": "Tuma ombi. Kisha ushirika unaangalia ombi."
     },
     "payFirst": "Lipa mkopo wa sasa kwanza. Kisha unaweza kuomba tena.",
     "lockedBody": "Fuata hatua hizi alama yako ifikiapo kiwango kinachofuata. Hakuna kinachotumwa hadi hapo.",
     "submit": "Tuma ombi",
     "submitting": "Inatuma…",
+    "submitHelp": "Hii inatuma ombi lako kwa ushirika. Kiasi kinatokana na alama yako na hakiandikwi kwa mkono.",
     "lockedTitle": "Bado hufai",
     "pendingTitle": "Ombi limepokelewa",
     "pendingBody": "Ombi lako la KES {{amount}} linaangaliwa.",
@@ -185,7 +188,16 @@
     "method": "Malipo yatachukuliwa kwa M-Pesa. Hali itaonekana kama Inasubiri hadi yathibitishwe.",
     "submit": "Tuma malipo",
     "sending": "Inatuma…",
-    "success": "Malipo yamewekwa. Yataonekana kama Inasubiri hadi yathibitishwe."
+    "success": "Ombi la malipo limetumwa simuni. Litaonekana kama Inasubiri hadi LOOP lithibitishe.",
+    "error": "Hatukuweza kutuma ombi la malipo. Jaribu tena."
+  },
+  "payout": {
+    "title": "Malipo ya mavuno",
+    "help": "Omba ushirika ulipe mavuno ambayo bado hayajalipwa kwa M-Pesa yako. Salio la mkopo linakatwa kwanza.",
+    "submit": "Omba malipo ya mavuno",
+    "sending": "Inatuma…",
+    "success": "Malipo yameanza. Kumbukumbu {{id}}.",
+    "error": "Hatukuweza kuanza malipo sasa."
   },
   "admin": {
     "title": "Akaunti zilizo na tahadhari",

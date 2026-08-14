@@ -12,6 +12,8 @@ function apiUrl(path) {
   return `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
+export { apiUrl, API_BASE };
+
 const CACHE_KEY = "my-readiness:last-profile";
 
 export async function fetchReadiness(lookup, lang) {

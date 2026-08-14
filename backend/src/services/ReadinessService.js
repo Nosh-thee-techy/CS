@@ -48,11 +48,12 @@ function toDisplayScore(coreScore) {
 }
 
 function eligibilityFromScore(score, maxLoanLimit) {
-  if (score >= 75) {
+  const amount = Math.max(0, Math.round(Number(maxLoanLimit) || 0));
+  if (amount > 0) {
     return {
       disbursementEligible: true,
-      eligibleAmount: Math.max(0, Math.round(Number(maxLoanLimit) || 0)),
-      nextTierScore: null,
+      eligibleAmount: amount,
+      nextTierScore: score >= 75 ? null : 75,
       nextTierAmount: null,
       applyThreshold: 50,
     };
@@ -62,7 +63,7 @@ function eligibilityFromScore(score, maxLoanLimit) {
       disbursementEligible: false,
       eligibleAmount: 0,
       nextTierScore: 75,
-      nextTierAmount: Math.max(0, Math.round(Number(maxLoanLimit) || 0)),
+      nextTierAmount: 20000,
       applyThreshold: 50,
     };
   }
@@ -225,6 +226,7 @@ async function buildProfile(farmer) {
     memberNumber: farmer.memberNumber || farmer.nationalId || farmer.farmerId,
     farmerId: farmer.farmerId,
     cooperativeId: farmer.cooperativeId,
+    phoneNumber: farmer.phoneNumber,
     score,
     whyKey: null,
     why: credit.aiExplanation || '',
@@ -306,7 +308,7 @@ export async function submitReadinessLoan(lookup, purpose) {
   const { loan } = await LoanService.requestLoan({
     farmerId: farmer.farmerId,
     cooperativeId: farmer.cooperativeId,
-    requestedAmount: profile.eligibleAmount,
+    requestedAmount: profile.eligibleAmount || profile.loanApplication?.amount || 0,
     purpose,
   });
 

@@ -49,7 +49,9 @@
     "offline": "Showing saved data, may be outdated.",
     "updated": "Last updated",
     "climate": "Climate advisory",
-    "climateStay": "Stick to this for your zone this season"
+    "climateStay": "Stick to this for your zone this season",
+    "applyCta": "Apply for KES {{amount}}",
+    "loanTab": "Open loan"
   },
   "voice": {
     "play": "Play Kali greeting",
@@ -132,12 +134,13 @@
       "1": "We show what you qualify for from your current score.",
       "2": "You choose how much you want — up to that limit.",
       "3": "You say what the money is for.",
-      "4": "Confirm with an SMS code. Then the co-op reviews the request."
+      "4": "Submit the application. Then the co-op reviews the request."
     },
     "payFirst": "Pay your current loan first. Then you can apply again.",
     "lockedBody": "Walk through these steps when your score reaches the next tier. Nothing is submitted until then.",
     "submit": "Submit application",
     "submitting": "Submitting…",
+    "submitHelp": "This sends your application to the co-op. The amount is set from your score and cannot be typed in.",
     "lockedTitle": "Not eligible yet",
     "pendingTitle": "Application received",
     "pendingBody": "Your application for KES {{amount}} is being reviewed.",
@@ -185,7 +188,16 @@
     "method": "Payment will be collected by M-Pesa. Status shows as Pending until it is confirmed.",
     "submit": "Send payment",
     "sending": "Sending…",
-    "success": "Payment recorded. It shows as Pending until it is confirmed."
+    "success": "Payment prompt sent to your phone. It shows as Pending until LOOP confirms it.",
+    "error": "Couldn't send the repayment prompt. Try again."
+  },
+  "payout": {
+    "title": "Harvest payout",
+    "help": "Ask the co-op to pay unpaid produce to your M-Pesa. Any loan balance is deducted first.",
+    "submit": "Request harvest payout",
+    "sending": "Sending…",
+    "success": "Payout started. Reference {{id}}.",
+    "error": "Couldn't start a payout right now."
   },
   "admin": {
     "title": "Flagged accounts",

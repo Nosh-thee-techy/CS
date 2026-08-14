@@ -76,7 +76,7 @@ const EN = {
       return `Your loan application is being reviewed. Reference ${p.loanApplication.reference}.`;
     }
     if (p.disbursementEligible) {
-      return `You qualify for up to KES ${Number(p.eligibleAmount).toLocaleString("en-KE")}. On Loan, choose how much you want — not more than that — say what it is for, then confirm with an SMS code.`;
+      return `You qualify for up to KES ${Number(p.eligibleAmount).toLocaleString("en-KE")}. On Loan, tap Continue, choose what the money is for, then Submit application.`;
     }
     return p.nextTierHint
       ? `${p.nextTierHint} Open the Loan tab to see the steps. Nothing is sent until you qualify.`
@@ -111,7 +111,7 @@ const SW = {
       return `Ombi lako la mkopo linaangaliwa. Kumbukumbu ${p.loanApplication.reference}.`;
     }
     if (p.disbursementEligible) {
-      return `Unastahili hadi KES ${Number(p.eligibleAmount).toLocaleString("en-KE")}. Kwenye Mkopo, chagua kiasi — si zaidi ya hicho — sema madhumuni, kisha thibitisha kwa SMS.`;
+      return `Unastahili hadi KES ${Number(p.eligibleAmount).toLocaleString("en-KE")}. Kwenye Mkopo, gusa Endelea, chagua madhumuni, kisha Tuma ombi.`;
     }
     return p.nextTierHint
       ? `${p.nextTierHint} Fungua Mkopo kuona hatua. Hakuna kinachotumwa hadi ustahili.`

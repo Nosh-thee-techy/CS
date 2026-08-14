@@ -32,6 +32,9 @@ const NAMED_PROFILES = {
   "KTDA-43456789": {
     farmerName: "Mary Wanjiku",
     memberNumber: "KTDA-43456789",
+    farmerId: "F-001",
+    cooperativeId: "C001",
+    phoneNumber: "0700434567",
     score: 68,
     whyKey: "why_deliveries",
     strengths: ["delivery_consistency", "tenure"],
@@ -41,6 +44,9 @@ const NAMED_PROFILES = {
   "0712345678": {
     farmerName: "Samuel Kipchoge",
     memberNumber: "KTDA-22019834",
+    farmerId: "F-009",
+    cooperativeId: "C004",
+    phoneNumber: "0712345678",
     score: 82,
     whyKey: "why_credit_ready",
     strengths: ["delivery_consistency", "chama_savings"],
@@ -50,6 +56,9 @@ const NAMED_PROFILES = {
   "12345678": {
     farmerName: "Amina Hassan",
     memberNumber: "KTDA-88110221",
+    farmerId: "F-010",
+    cooperativeId: "C003",
+    phoneNumber: "0711881102",
     score: 41,
     whyKey: "why_building",
     strengths: ["tenure", "delivery_consistency"],
@@ -212,8 +221,8 @@ function eligibilityFromScore(score) {
   }
   if (score >= 50) {
     return {
-      disbursementEligible: false,
-      eligibleAmount: 0,
+      disbursementEligible: true,
+      eligibleAmount: 8000,
       nextTierScore: 75,
       nextTierAmount: 20000,
       applyThreshold: 50,

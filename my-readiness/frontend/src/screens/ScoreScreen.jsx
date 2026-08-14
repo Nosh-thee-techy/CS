@@ -2,12 +2,13 @@ import { useTranslation } from "react-i18next";
 import MountainScene from "../components/MountainScene.jsx";
 import BandBadge from "../components/BandBadge.jsx";
 import VoiceGreeting from "../components/VoiceGreeting.jsx";
+import PillButton from "../components/PillButton.jsx";
 import { useReadiness } from "../context/ReadinessContext.jsx";
 import StrengthsGaps from "./StrengthsGaps.jsx";
 
 export default function ScoreScreen() {
   const { t, i18n } = useTranslation();
-  const { profile, fromCache, reset } = useReadiness();
+  const { profile, fromCache, reset, setTab } = useReadiness();
 
   if (!profile) return null;
 
@@ -80,6 +81,16 @@ export default function ScoreScreen() {
       <StrengthsGaps strengths={profile.strengths} gaps={profile.gaps} />
 
       <VoiceGreeting text={profile.voiceGreetingText} locale={i18n.language} />
+
+      {Number(profile.eligibleAmount) > 0 ? (
+        <PillButton type="button" variant="ember" onClick={() => setTab("loan")}>
+          {t("score.applyCta", { amount: Number(profile.eligibleAmount).toLocaleString("en-KE") })}
+        </PillButton>
+      ) : (
+        <PillButton type="button" variant="white" onClick={() => setTab("loan")}>
+          {t("score.loanTab")}
+        </PillButton>
+      )}
     </div>
   );
 }

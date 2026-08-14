@@ -8,6 +8,14 @@ import {
   requestOtp as postOtp,
   submitLoan as postLoan,
 } from "../api/readiness.js";
+import {
+  getOutstandingLoans,
+  getPayoutsByFarmer,
+  getUnpaidProduce,
+  initiatePayout,
+  promptLoanRepayment,
+  requestLoan,
+} from "../api/platform.js";
 import { rememberMemberLocale } from "../i18n/index.js";
 
 const ReadinessContext = createContext(null);
@@ -25,6 +33,9 @@ export function ReadinessProvider({ children }) {
   const [loanError, setLoanError] = useState("");
   const [loanBusy, setLoanBusy] = useState(false);
   const [otpHint, setOtpHint] = useState("");
+  const [payoutBusy, setPayoutBusy] = useState(false);
+  const [payoutError, setPayoutError] = useState("");
+  const [payoutNotice, setPayoutNotice] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -67,6 +78,8 @@ export function ReadinessProvider({ children }) {
     setFromCache(false);
     setLoanError("");
     setOtpHint("");
+    setPayoutError("");
+    setPayoutNotice("");
     setTab("score");
 
     try {
@@ -144,18 +157,45 @@ export function ReadinessProvider({ children }) {
   }
 
   async function applyForLoan(purpose, otpCode, requestedAmount) {
-    if (!lookup || !profile?.disbursementEligible) return;
+    if (!lookup || !profile) return;
+    const farmerId = profile.farmerId;
+    const cooperativeId = profile.cooperativeId;
+    const amount = Number(requestedAmount) || Number(profile.eligibleAmount) || 0;
+    if (!farmerId || !cooperativeId || amount <= 0) {
+      setLoanError("Couldn't submit right now. Try again.");
+      return;
+    }
+
     setLoanBusy(true);
     setLoanError("");
     try {
-      const result = await postLoan(lookup, purpose, otpCode);
-      const requested = Number(requestedAmount) || result.application?.amount;
+      let result;
+      try {
+        result = await requestLoan({
+          farmerId,
+          cooperativeId,
+          requestedAmount: amount,
+          purpose,
+        });
+      } catch (err) {
+        if (otpCode) {
+          result = { application: await postLoan(lookup, purpose, otpCode) };
+        } else {
+          throw err;
+        }
+      }
+
+      const loan = result.loan || result.application || result;
+      const requested = Number(loan.requestedAmount || loan.amount || amount);
       setProfile((current) => {
         const next = {
           ...current,
           loanApplication: {
-            ...result.application,
+            status: "pending",
+            amount: requested,
             requestedAmount: requested,
+            purpose: loan.purpose || purpose,
+            reference: loan.loanId || loan.reference,
           },
         };
         cacheProfile(lookup, next);
@@ -169,18 +209,28 @@ export function ReadinessProvider({ children }) {
   }
 
   async function repayLoan(amount) {
-    if (!lookup || !profile) return;
+    if (!lookup || !profile?.farmerId) return;
     const kes = Number(amount) || 0;
     if (kes <= 0) return;
 
+    const outstanding = await getOutstandingLoans(profile.farmerId);
+    const loan = (outstanding.activeLoans || [])[0];
+    if (!loan?.loanId) {
+      throw new Error("No outstanding loan found.");
+    }
+
+    await promptLoanRepayment(loan.loanId, {
+      amount: kes,
+      mobileNo: profile.phoneNumber,
+    });
+
     const payment = {
-      id: `pay_local_${Date.now()}`,
+      id: `pay_${loan.loanId}_${Date.now()}`,
       kind: "loan_repayment",
       kindLabel: "Loan repayment",
       amount: kes,
       rawStatus: "pending",
       status: "Pending",
-      localOnly: true,
     };
 
     const key = lookup.trim().toUpperCase();
@@ -193,6 +243,47 @@ export function ReadinessProvider({ children }) {
     });
   }
 
+  async function requestHarvestPayout() {
+    if (!profile?.farmerId || !profile?.cooperativeId) {
+      setPayoutError("Couldn't start a payout right now.");
+      return;
+    }
+    setPayoutBusy(true);
+    setPayoutError("");
+    setPayoutNotice("");
+    try {
+      const unpaid = await getUnpaidProduce(profile.farmerId).catch(() => ({ grossTotal: 0 }));
+      if (!unpaid?.grossTotal) {
+        throw new Error("No unpaid harvest to pay out.");
+      }
+      const result = await initiatePayout({
+        farmerId: profile.farmerId,
+        cooperativeId: profile.cooperativeId,
+      });
+      const payout = result.payout || result;
+      setPayoutNotice(payout.payoutId || "Payout started.");
+      const payouts = await getPayoutsByFarmer(profile.farmerId).catch(() => []);
+      setProfile((current) => {
+        const deductions = (payouts || []).map((row) => ({
+          id: row.payoutId,
+          reason: "loan_recovery",
+          gross: Number(row.grossProduceAmount) || 0,
+          deducted: Number(row.loanDeductionAmount) || 0,
+          net: Number(row.netPayoutAmount) || 0,
+          rawStatus: String(row.status || "").toLowerCase().includes("fail") ? "failed" : "pending",
+          status: row.status,
+        }));
+        const next = { ...current, deductions };
+        cacheProfile(lookup, next);
+        return next;
+      });
+    } catch (err) {
+      setPayoutError(err.message || "Couldn't start a payout right now.");
+    } finally {
+      setPayoutBusy(false);
+    }
+  }
+
   function reset() {
     setLookup("");
     setProfile(null);
@@ -202,6 +293,8 @@ export function ReadinessProvider({ children }) {
     setToast("");
     setLoanError("");
     setOtpHint("");
+    setPayoutError("");
+    setPayoutNotice("");
   }
 
   const value = useMemo(
@@ -218,15 +311,19 @@ export function ReadinessProvider({ children }) {
       loanError,
       loanBusy,
       otpHint,
+      payoutBusy,
+      payoutError,
+      payoutNotice,
       lookupFarmer,
       refreshProfile,
       reportAction,
       sendLoanOtp,
       applyForLoan,
       repayLoan,
+      requestHarvestPayout,
       reset,
     }),
-    [lookup, profile, tab, loading, error, fromCache, toast, loanError, loanBusy, otpHint, i18n.language],
+    [lookup, profile, tab, loading, error, fromCache, toast, loanError, loanBusy, otpHint, payoutBusy, payoutError, payoutNotice, i18n.language],
   );
 
   return <ReadinessContext.Provider value={value}>{children}</ReadinessContext.Provider>;
