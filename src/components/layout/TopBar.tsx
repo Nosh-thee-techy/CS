@@ -79,7 +79,7 @@ export default function TopBar({ portal }: { portal: Portal }) {
             }}>
               <div style={{ fontWeight: 800, fontSize: '0.88rem', marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span>Notifications</span>
-                <span className="status-pill status-paid">M-Pesa Live</span>
+                <span className="status-pill status-paid">LOOP Live</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: '0.78rem' }}>
                 <div style={{ padding: '8px 12px', background: 'var(--bg-app)', borderRadius: 8 }}>

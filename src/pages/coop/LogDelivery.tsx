@@ -35,7 +35,7 @@ export default function LogDelivery() {
           </div>
           <h2 style={{ fontSize: '1.4rem', marginBottom: 8 }}>Delivery Logged Successfully!</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
-            An instant SMS confirmation has been pushed to {farmer?.name}'s phone via Daraja M-Pesa.
+            An instant SMS confirmation has been pushed to {farmer?.name}'s phone via LOOP Platform.
           </p>
 
           <div style={{

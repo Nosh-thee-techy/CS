@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Smartphone, Building2, Zap, ShieldCheck } from 'lucide-react';
-import { LimaNaLoopLogo } from '../components/ui/LimaNaLoopLogo';
+import logoImg from '../assets/lima-na-loop-logo.png';
 
 const portals = [
   {
     id: 'farmer',
     icon: '🌿',
     title: 'Farmer Portal',
-    subtitle: 'Smallholder M-Pesa Wallet',
+    subtitle: 'Smallholder Wallet',
     desc: 'Itemised payout statements, delivery confirmation SMS & agricultural credit score.',
     route: '/app/farmer',
-    badge: 'M-Pesa Connected',
+    badge: 'LOOP Connected',
   },
   {
     id: 'coop',
@@ -27,7 +27,7 @@ const portals = [
     icon: '🔁',
     title: 'Loop Platform',
     subtitle: 'Financial Engine & Credit Scoring',
-    desc: 'Central credit engine, risk analytics & Daraja 3.0 B2C payout execution.',
+    desc: 'Central credit engine, risk analytics & LOOP B2C payout execution.',
     route: '/app/loop',
     badge: 'Loop Financial Infra',
   },
@@ -76,14 +76,27 @@ export default function Login() {
 
         {/* Brand Header Badge */}
         <div>
-          <div style={{ marginBottom: 32 }}>
-            <LimaNaLoopLogo size={48} showText={true} textColor="var(--loop-dark)" />
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 12,
+            padding: '6px 18px', borderRadius: 99,
+            background: '#FFFFFF', border: '1px solid var(--border-light)',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            marginBottom: 36,
+          }}>
+            <img
+              src={logoImg}
+              alt="Lima na Loop Logo"
+              style={{ width: 32, height: 32, objectFit: 'contain' }}
+            />
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--loop-dark)', letterSpacing: '0.04em' }}>
+              POWERED BY LOOP API
+            </span>
           </div>
 
           {/* Hero Main Headline */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--loop-orange)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-              Aesthetic Agricultural Credit & Supply Chain Financing
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--loop-orange)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 4 }}>
+              NEW AGE SUPPLY CHAIN FINANCING
             </div>
             <h1 style={{
               fontSize: '3.6rem',
