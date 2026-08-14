@@ -8,6 +8,34 @@ import { apiUrl } from '../../lib/api';
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
 const AT_SIM = 'https://simulator.africastalking.com:1517/';
 
+type ChatRow = { who: 'kali' | 'you'; text: string };
+type ReadinessProfile = {
+  farmerName?: string;
+  voiceGreetingText?: string;
+  [key: string]: unknown;
+};
+type AtStatus = {
+  shortCode: string;
+  voiceNumber: string;
+  sandbox: boolean;
+  smsOutbound: boolean;
+  publicCallback: boolean;
+  simulator: string;
+  username?: string;
+  callbacks: { ussd: string; voice: string };
+  channelHints: string[];
+};
+type SpeechRec = {
+  start: () => void;
+  stop: () => void;
+  lang: string;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  onresult: ((event: { results?: ArrayLike<ArrayLike<{ transcript?: string }>> }) => void) | null;
+};
+
 const EXAMPLES = [
   { lang: 'en', text: 'What is my score?' },
   { lang: 'en', text: 'Can I get a loan?' },
@@ -18,8 +46,11 @@ const EXAMPLES = [
   { lang: 'sw', text: 'Nifanye nini sasa?' },
 ];
 
-function SpeechEngine(): (new () => { start: () => void; stop: () => void; lang: string; interimResults: boolean; onstart: (() => void) | null; onend: (() => void) | null; onerror: (() => void) | null; onresult: ((event: { results?: ArrayLike<ArrayLike<{ transcript?: string }>> }) => void) | null }) | null {
-  const w = window as typeof window & { SpeechRecognition?: new () => never; webkitSpeechRecognition?: new () => never };
+function SpeechEngine(): (new () => SpeechRec) | null {
+  const w = window as typeof window & {
+    SpeechRecognition?: new () => SpeechRec;
+    webkitSpeechRecognition?: new () => SpeechRec;
+  };
   return w.SpeechRecognition || w.webkitSpeechRecognition || null;
 }
 
@@ -39,21 +70,22 @@ export default function PhoneSimulator() {
   const [mode, setMode] = useState<'dialer' | 'ussd' | 'call'>('dialer');
   const [loading, setLoading] = useState(false);
   const [locale, setLocale] = useState('en');
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState<ReadinessProfile | null>(null);
   const [speaking, setSpeaking] = useState(false);
   const [listening, setListening] = useState(false);
-  const [log, setLog] = useState([]);
-  const [at, setAt] = useState({
+  const [log, setLog] = useState<ChatRow[]>([]);
+  const [at, setAt] = useState<AtStatus>({
     shortCode: '',
     voiceNumber: '',
     sandbox: true,
     smsOutbound: false,
     publicCallback: false,
     simulator: AT_SIM,
+    username: 'sandbox',
     callbacks: { ussd: '/api/ussd', voice: '/api/voice' },
     channelHints: [],
   });
-  const recognitionRef = useRef(null);
+  const recognitionRef = useRef<SpeechRec | null>(null);
   const shortCode = at.shortCode || 'AT-assigned *384*…#';
   const voiceNumber = at.voiceNumber || '0700000000';
 
@@ -69,7 +101,7 @@ export default function PhoneSimulator() {
       .then((res) => res.json())
       .then((payload) => {
         if (!payload?.data) return;
-        setAt(payload.data);
+        setAt((current) => ({ ...current, ...payload.data }));
         setDisplay(welcomeCopy(payload.data.shortCode, payload.data.voiceNumber));
       })
       .catch(() => {});
@@ -98,7 +130,7 @@ export default function PhoneSimulator() {
   const loadProfile = useCallback(async (lang = locale) => {
     const res = await fetch(apiUrl(`/api/readiness/${encodeURIComponent(phoneNumber)}?lang=${encodeURIComponent(lang)}`));
     if (!res.ok) return null;
-    const data = await res.json();
+    const data = (await res.json()) as ReadinessProfile;
     setProfile(data);
     return data;
   }, [phoneNumber, locale]);
