@@ -34,6 +34,7 @@
 - [💡 Solution Summary](#-solution-summary)
 - [✨ Core Innovation](#-core-innovation)
 - [🛠 Technical Summary](#-technical-summary)
+- [🔍 What Makes This Different From Others](#-what-makes-this-different-from-others)
 - [👥 Team Roster (Team RKO)](#-team-roster-team-rko)
 
 ---
@@ -168,6 +169,24 @@ npm run dev
 
 ---
 
+## 🔍 What Makes This Different From Others
+
+| Existing systems | Our focus |
+|---|---|
+| Connect farmers to markets | **Assess farmer creditworthiness** |
+| Record deliveries | **Turn delivery history into credit signals** |
+| Facilitate payments | **Use payment behaviour as a risk signal** |
+| Provide some financing | **Improve the underlying credit assessment** |
+| Manage cooperatives | **Aggregate cooperative data into a farmer-level financial profile** |
+| Support farmer groups | **Use chama behaviour as an additional credit signal** |
+| Generic financial scoring | **Agriculture + Kenya-specific risk factors** |
+
+We're not claiming nobody has scored farmers before. The hypothesis we're testing:
+
+> **Can we construct a richer, more contextual credit profile for Kenyan farmers by combining fragmented agricultural, community-finance, repayment, and environmental data?**
+
+---
+
 ## 👥 Team Roster
 
 ### **Team Name: RKO**
@@ -184,7 +203,7 @@ npm run dev
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Built_by-Team_RKO_for_LOOP_Hackathon_2026-FF6B00?style=for-the-badge" alt="Built by Team RKO for LOOP Hackathon 2026"/>
+<img src="https://img.shields.io/badge/UNLEASHLOOP.COM_Hackathon-FF6B00?style=for-the-badge" alt="UNLEASHLOOP Hackathon"/>
 
 <br/>
 
