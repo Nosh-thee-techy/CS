@@ -1,21 +1,27 @@
 <div align="center">
 
-# 🌾 Lima na Loop
+<img src="https://capsule-render.vercel.app/api?type=waving&color=FF6B00&height=180&section=header&text=🌾%20Lima%20na%20Loop&fontSize=42&fontColor=ffffff" width="100%"/>
 
 ### A Kenya-specific agricultural credit-scoring platform, powered by LOOP
 
 **Turning a farmer's harvest history into their financial future.**
 
-![Status](https://img.shields.io/badge/status-hackathon%20build-orange)
-![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20TypeScript%20%7C%20PostgreSQL-blue)
-![Payments](https://img.shields.io/badge/payments-LOOP%20API-2f855a)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+<br/>
+
+![Status](https://img.shields.io/badge/status-hackathon%20build-FF6B00?style=for-the-badge&logo=github)
+![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20TypeScript%20%7C%20PostgreSQL-FF8C00?style=for-the-badge&logo=nodedotjs)
+![Payments](https://img.shields.io/badge/payments-LOOP%20API-E65100?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-d35400?style=for-the-badge)
+
+<br/>
+
+*"Lima" — Swahili for "to cultivate." We cultivate creditworthiness from the data farmers already generate.*
 
 </div>
 
 ---
 
-## 📋 Table of Contents
+## 🍊 Table of Contents
 
 - [The Problem](#-the-problem)
 - [Solution Summary](#-solution-summary)
@@ -31,16 +37,15 @@
 
 Kenyan smallholder farmers generate real, verifiable economic activity every season — but almost none of it counts when they apply for credit. 
 
-Agriculture is the backbone of the Kenyan economy, contributing 26% to the Gross Domestic Product. Small-scale farming accounts for 78% of total agricultural production in Kenya and contributes to 23.5% of the country’s GDP.Despite this, small-scale farmers in Kenya continue to face significant barriers in accessing formal credit. According to a 2021 study by the Alliance for a Green Revolution in Africa (AGRA), only 15% of smallholder farmers in Kenya have access to formal credit, with the majority relying on informal sources that are often expensive and unreliable.Most of these credits done by their relations to their co-operatives. 
+Agriculture is the backbone of the Kenyan economy, contributing 26% to the Gross Domestic Product. Small-scale farming accounts for 78% of total agricultural production in Kenya and contributes to 23.5% of the country’s GDP. Despite this, small-scale farmers in Kenya continue to face significant barriers in accessing formal credit. According to a 2021 study by the Alliance for a Green Revolution in Africa (AGRA), only 15% of smallholder farmers in Kenya have access to formal credit, with the majority relying on informal sources that are often expensive and unreliable. Most of these credits are tied to their relations with co-operatives. 
 
 This makes it difficult for farmers to access credit when they need it to purchase inputs like seeds, fertilizers, and equipment, or to invest in improving their farming practices. It also makes it difficult for them to access loans to expand their farming operations or to invest in value-addition activities that could increase their income.
-
 
 A typical farmer may have:
 
 | Signal | Example |
 |---|---|
-| 🌱 Consistent produce deliveries | Years of coffee/milk delivered to a cooperative |
+| 🌾 Consistent produce deliveries | Years of coffee/milk delivered to a cooperative |
 | 💰 Regular cooperative payments | Predictable, if delayed, settlement income |
 | 🔁 Input-loan repayment history | Advances repaid season after season |
 | 🤝 Chama savings discipline | Years of consistent group contributions |
@@ -58,8 +63,7 @@ A typical farmer may have:
 
 We don't replace cooperatives or agritech platforms. **We integrate with them.**
 
-
-> We combine the scattered in cooperative records, chama behaviour, repayment history, farming activity and agricultural risk data into a richer measure of farmer creditworthiness — then use **LOOP** as the financial execution layer for bulk cooperative payments and loan disbursement.
+> We combine the scattered data in cooperative records, chama behaviour, repayment history, farming activity and agricultural risk data into a richer measure of farmer creditworthiness — then use **LOOP** as the financial execution layer for bulk cooperative payments and loan disbursement.
 
 ---
 
@@ -226,6 +230,8 @@ We're not claiming nobody has scored farmers before. The hypothesis we're testin
 
 <div align="center">
 
-**Built for LOOP Hackathon 2026** · Sector Solutions × AI-led Business Transformation
+<img src="https://img.shields.io/badge/Built_for-LOOP_Hackathon_2026-FF6B00?style=for-the-badge" alt="Built for LOOP Hackathon 2026"/>
+
+*Sector Solutions × AI-led Business Transformation*
 
 </div>
