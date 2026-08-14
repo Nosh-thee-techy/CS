@@ -8,40 +8,45 @@
 
 <br/>
 
-![Status](https://img.shields.io/badge/status-hackathon%20build-FF6B00?style=for-the-badge&logo=github)
-![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20TypeScript%20%7C%20PostgreSQL-FF8C00?style=for-the-badge&logo=nodedotjs)
-![Payments](https://img.shields.io/badge/payments-LOOP%20API-E65100?style=for-the-badge)
-![License](https://img.shields.io/badge/license-MIT-d35400?style=for-the-badge)
-
-<br/>
-
-*"Lima" — Swahili for "to cultivate." We cultivate creditworthiness from the data farmers already generate.*
+![Status](https://img.shields.io/badge/status-hackathon%20submission-FF6B00?style=for-the-badge&logo=github)
+![Team](https://img.shields.io/badge/Team-RKO-FF8C00?style=for-the-badge)
+![Stack](https://img.shields.io/badge/stack-Node.js%20%7C%20TypeScript%20%7C%20PostgreSQL-E65100?style=for-the-badge)
+![Payments](https://img.shields.io/badge/payments-LOOP%20API-d35400?style=for-the-badge)
 
 </div>
 
 ---
 
-## 🍊 Table of Contents
+## 🎬 Demo Recording
 
-- [The Problem](#-the-problem)
-- [Solution Summary](#-solution-summary)
-- [Core Innovation & Creativity](#-core-innovation--creativity)
-- [Technical Implementation](#-technical-implementation)
-- [Business & Market Impact](#-business--market-impact)
-- [What Makes This Different](#-what-makes-this-different)
-- [Roadmap](#-roadmap)
+> 📺 **Watch the Demo Video & Pitch:**
+> 
+> **[▶️ Watch Lima na Loop Demo Recording](https://youtube.com/YOUR_DEMO_LINK)** *(Paste your video link here)*
+> 
+> **[🌐 Live Application / Presentation Slide Deck](https://YOUR_DEMO_URL)**
 
 ---
 
-## 🧩 The Problem
+## 📋 Table of Contents
+
+- [🎬 Demo Recording](#-demo-recording)
+- [🧩 Problem Statement](#-problem-statement)
+- [💡 Solution Summary](#-solution-summary)
+- [✨ Core Innovation](#-core-innovation)
+- [🛠 Technical Summary](#-technical-summary)
+- [👥 Team Roster (Team RKO)](#-team-roster-team-rko)
+
+---
+
+## 🧩 Problem Statement
 
 Kenyan smallholder farmers generate real, verifiable economic activity every season — but almost none of it counts when they apply for credit. 
 
-Agriculture is the backbone of the Kenyan economy, contributing 26% to the Gross Domestic Product. Small-scale farming accounts for 78% of total agricultural production in Kenya and contributes to 23.5% of the country’s GDP. Despite this, small-scale farmers in Kenya continue to face significant barriers in accessing formal credit. According to a 2021 study by the Alliance for a Green Revolution in Africa (AGRA), only 15% of smallholder farmers in Kenya have access to formal credit, with the majority relying on informal sources that are often expensive and unreliable. Most of these credits are tied to their relations with co-operatives. 
+Agriculture is the backbone of the Kenyan economy, contributing **26% to the Gross Domestic Product**. Small-scale farming accounts for **78% of total agricultural production** in Kenya and contributes **23.5% of the country’s GDP**. 
 
-This makes it difficult for farmers to access credit when they need it to purchase inputs like seeds, fertilizers, and equipment, or to invest in improving their farming practices. It also makes it difficult for them to access loans to expand their farming operations or to invest in value-addition activities that could increase their income.
+Despite this, small-scale farmers in Kenya continue to face significant barriers in accessing formal credit. According to a study by AGRA, **only 15% of smallholder farmers in Kenya have access to formal credit**, with the majority relying on informal sources that are often expensive and unreliable. Most existing credit relies informally on relationships within local co-operatives.
 
-A typical farmer may have:
+This makes it difficult for farmers to access credit when they need it to purchase inputs like seeds, fertilizers, and equipment, or to invest in improving their farming practices and expanding operations.
 
 | Signal | Example |
 |---|---|
@@ -51,7 +56,7 @@ A typical farmer may have:
 | 🤝 Chama savings discipline | Years of consistent group contributions |
 | 📆 Predictable seasonal income | Reliable, if irregular, cash flow |
 
-**Yet all of this is fragmented** — scattered across cooperatives, chamas, informal lenders, and payment platforms that don't talk to each other. Traditional credit scoring, built for salaried, formally banked applicants, simply can't see this farmer. The result: creditworthy farmers are locked out of affordable financing, not because they're risky, but because they're *invisible* to the systems that decide.
+**Yet all of this is fragmented** — scattered across cooperatives, chamas, informal lenders, and payment platforms that don't talk to each other. Traditional credit scoring simply can't see this farmer. 
 
 > **The gap isn't willingness or ability to repay. It's fragmented, unreadable data.**
 
@@ -63,7 +68,17 @@ A typical farmer may have:
 
 We don't replace cooperatives or agritech platforms. **We integrate with them.**
 
-> We combine the scattered data in cooperative records, chama behaviour, repayment history, farming activity and agricultural risk data into a richer measure of farmer creditworthiness — then use **LOOP** as the financial execution layer for bulk cooperative payments and loan disbursement.
+```
+Cooperatives + Chamas + Produce History + Payment Data
+                         ↓
+         Agricultural Credit Scoring Engine
+                         ↓
+               Farmer Credit Profile
+                         ↓
+      LOOP API → Loan Disbursement & Bulk Payments
+```
+
+> We combine scattered cooperative records, chama behaviour, repayment history, farming activity, and agricultural risk data into a richer measure of farmer creditworthiness — then use **LOOP** as the financial execution layer for bulk cooperative payments and loan disbursement.
 
 ---
 
@@ -71,8 +86,8 @@ We don't replace cooperatives or agritech platforms. **We integrate with them.**
 
 Payments are not our differentiator — **the credit score is.** LOOP is infrastructure; the intelligence layer is our IP.
 
-### 1. A credit score built *for* Kenyan farmers, not adapted from generic scoring
-Instead of forcing agricultural livelihoods into a conventional financial-history template, the score is built from five signal groups:
+### 1. Agriculture-Specific Credit Score
+Built from five signal groups:
 
 | Factor | Weight | What it captures |
 |---|---|---|
@@ -83,33 +98,33 @@ Instead of forcing agricultural livelihoods into a conventional financial-histor
 | **Environmental/agricultural risk** | 10% | Climate zone, drought/flood exposure, crop-specific risk |
 | **Platform data reliability** | 5% | Confidence weighting on data completeness |
 
-### 2. Risk-aware, not location-punitive
-The most defensible design decision in the model: **environmental risk adjusts loan *context*, not farmer *character*.** A farmer in a drought-prone zone with excellent repayment history isn't penalized as untrustworthy — the system instead recommends adjusted exposure or insurance requirements. This distinction is what separates a fair agricultural score from a discriminatory postcode score.
+### 2. Risk-Aware Credit Decisions
+Environmental risk adjusts loan *context*, not farmer *character*. A farmer in a drought-prone zone with excellent repayment history isn't penalized as untrustworthy — the system recommends adjusted exposure or insurance requirements.
 
-### 3. AI explains, it doesn't decide
+### 3. Explainable AI Engine
 ```
 DATA → DETERMINISTIC CREDIT ENGINE → SCORE → AI → HUMAN-READABLE EXPLANATION
 ```
-The AI layer never independently generates the score — it explains a deterministic engine's output in plain language ("strong repayment history, reduced slightly by drought exposure in this cycle"). This keeps the model auditable, defensible, and safe to put in front of a loan officer or a judge.
-
-### 4. Designed for integration, not replacement
-A farmer's history isn't lost just because they've never used our app. The architecture is built around ingesting existing cooperative and chama data from day one — the platform grows *with* the ecosystem instead of asking farmers to start from zero.
+The AI layer explains the scoring engine's output in plain language ("strong repayment history, reduced slightly by drought exposure in this cycle"), keeping the model auditable, defensible, and safe.
 
 ---
 
-## 🛠 Technical Implementation
+## 🛠 Technical Summary
 
-### Stack
+### Tech Stack
 
 | Layer | Choice | Why |
 |---|---|---|
-| Frontend | React + TypeScript + Vite | Fast iteration, type-safe contract with backend |
-| Backend | Node.js + TypeScript + Express/Fastify | Clean REST contract, team-familiar |
-| Database | PostgreSQL + Prisma ORM | Relational integrity for financial records |
-| Auth | JWT | Simple, stateless, role-based (`FARMER`, `COOPERATIVE`, `ADMIN`) |
-| Validation | Zod | Type-safe request validation |
-| Payments | LOOP API | Bulk disbursement + loan payout execution |
-| Async processing (later) | Redis + queue | For high-volume settlement batches |
+| **Frontend** | React + TypeScript + Vite | Fast iteration, type-safe contract with backend |
+| **Backend** | Node.js + TypeScript + Express/Fastify | Clean REST contract, modular service pattern |
+| **Database** | PostgreSQL + Prisma ORM | Relational integrity for financial records |
+| **Auth** | JWT | Role-based security (`FARMER`, `COOPERATIVE`, `ADMIN`) |
+| **Payments** | LOOP API | Bulk disbursement + loan payout execution |
+
+### 💳 LOOP API Integration Points
+- **LOOP Bulk Payout API:** Batched, automated settlement payouts to 100+ farmers in a single call.
+- **LOOP Instant Payouts:** Direct wallet/account loan disbursement upon credit score approval.
+- **LOOP Webhooks:** Asynchronous settlement & transaction status processing.
 
 ### Architecture
 
@@ -131,106 +146,47 @@ A farmer's history isn't lost just because they've never used our app. The archi
                       CREDIT ENGINE
                              │
                              ▼
-                       CREDIT SCORE
+                       CREDIT SCORE ──► AI EXPLAINER
                              │
                              ▼
-                       AI EXPLAINER
-                             │
-   ┌─────────────────────────┘
-   ▼
- PAYMENT SERVICE ─────────► LOOP API ─────────► PostgreSQL
-                          (bulk payments,
-                        loan disbursement,
-                        webhook status)
+                       LOOP SERVICE ──► LOOP API
 ```
 
-**Key architectural principle:** LOOP integration lives in its own isolated module (`integrations/loop/`). Controllers never call LOOP directly — every request flows `controller → service → payment.service → loop.service → LOOP API`. If LOOP's contract changes, one file changes, not the whole backend.
+### 🚀 Quick Start / Local Setup
 
-### API surface (v1)
+```bash
+# 1. Clone the repository
+git clone https://github.com/Nosh-thee-techy/CS.git
+cd CS
 
+# 2. Install dependencies
+npm install
+
+# 3. Start development environment
+npm run dev
 ```
-/auth        → login, register, me
-/farmers     → CRUD + filtering (county, cooperative, crop, min credit score)
-/produce     → delivery records (backend calculates payment amount, not frontend)
-/transactions→ unified financial history (produce earnings, loans, repayments, deductions)
-/payments    → bulk cooperative payouts, payment status, LOOP webhooks
-/credit      → score + human-readable AI explanation
-/loans       → application → approval → disbursement lifecycle
-```
-
-Sample: **bulk cooperative settlement**
-
-```json
-POST /api/v1/payments/bulk
-{
-  "cooperativeId": "COOP-001",
-  "payments": [
-    { "farmerId": "FARM-001", "amount": 50000 },
-    { "farmerId": "FARM-002", "amount": 35000 }
-  ],
-  "description": "August farmer settlement"
-}
-```
-The backend validates farmers and balances, batches the request to LOOP, and tracks status asynchronously via webhook — payment systems are never assumed synchronous.
-
-### Design safeguards
-- **Soft deletion only** — financial and produce records are deactivated/voided, never physically deleted.
-- **Backend-owned scoring** — the frontend never calculates or trusts a client-side credit score.
-- **Environmental risk ≠ farmer penalty** — encoded as an explicit rule in the scoring engine, not left to interpretation.
 
 ---
 
-## 📈 Business & Market Impact
+## 👥 Team Roster
 
-**Who this serves:**
-- **Farmers** gain access to financing that reflects their actual economic behaviour, not just what a bank can see.
-- **Cooperatives** get an integrated settlement and reconciliation layer instead of manual batch payouts.
-- **Lenders/financiers** get a richer, more explainable risk signal — lower default risk from better-informed decisions, not just more applicants approved.
+### **Team Name: RKO**
 
-**Why now:**
-Kenya's cooperative and chama ecosystems already produce the data needed for this model — mobile money penetration, cooperative digitization, and open agricultural datasets have matured enough that the missing piece is *aggregation and interpretation*, not new data collection infrastructure.
-
-**Path to adoption:**
-1. Pilot with 1–2 cooperatives (coffee or dairy — well-documented, structured delivery records).
-2. Demonstrate score correlation against actual repayment outcomes to calibrate thresholds.
-3. Expand chama data integration with consent-based partnerships.
-4. Offer lenders an API to query the credit score directly, monetizing via a scoring-as-a-service model alongside LOOP-powered disbursement.
-
-**Market signal:** this isn't a payments product competing with LOOP or M-Pesa — it's a *credit intelligence* layer that makes existing payment rails more useful to lenders, which is a defensible, complementary position rather than a crowded one.
-
----
-
-## 🔍 What Makes This Different
-
-| Existing systems | Our focus |
-|---|---|
-| Connect farmers to markets | **Assess farmer creditworthiness** |
-| Record deliveries | **Turn delivery history into credit signals** |
-| Facilitate payments | **Use payment behaviour as a risk signal** |
-| Provide some financing | **Improve the underlying credit assessment** |
-| Manage cooperatives | **Aggregate cooperative data into a farmer-level financial profile** |
-| Support farmer groups | **Use chama behaviour as an additional credit signal** |
-| Generic financial scoring | **Agriculture + Kenya-specific risk factors** |
-
-We're not claiming nobody has scored farmers before. The hypothesis we're testing:
-
-> **Can we construct a richer, more contextual credit profile for Kenyan farmers by combining fragmented agricultural, community-finance, repayment, and environmental data?**
-
----
-
-## 🗺 Roadmap
-
-- [ ] Hackathon MVP: mock cooperative CSV import, deterministic scoring engine, AI explanation endpoint, LOOP sandbox bulk-payment demo
-- [ ] Calibrate score thresholds against real repayment outcomes
-- [ ] Cooperative ERP integration endpoint (`/integrations/cooperatives`)
-- [ ] Consent-based chama data partnerships
-- [ ] Lender-facing scoring API
+| Name | Role | Responsibilities |
+|---|---|---|
+| **Ravine Rianga** | Front End Developer | UI/UX implementation, component development & responsive design |
+| **Francis Musau** | Product Designer | Product UX/UI design, user flow architecture & branding |
+| **Blessings Wanjiku** | Frontend Engineer | Frontend state management, API integration & farmer portal |
+| **Farouq Mohammed** | Integration's Officer / Backend Dev | LOOP API integration, payment webhooks & third-party connectors |
+| **Peter Kariuki** | Backend Developer | Database architecture, credit scoring engine & REST APIs |
 
 ---
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/Built_for-LOOP_Hackathon_2026-FF6B00?style=for-the-badge" alt="Built for LOOP Hackathon 2026"/>
+<img src="https://img.shields.io/badge/Built_by-Team_RKO_for_LOOP_Hackathon_2026-FF6B00?style=for-the-badge" alt="Built by Team RKO for LOOP Hackathon 2026"/>
+
+<br/>
 
 *Sector Solutions × AI-led Business Transformation*
 
