@@ -60,6 +60,24 @@ class LoanController {
       next(err);
     }
   }
+
+  async promptRepayment(req, res, next) {
+    try {
+      const result = await LoanService.promptRepaymentForLoan(req.params.loanId, req.body);
+      res.status(200).json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async handleLoopRepaymentCallback(req, res, next) {
+    try {
+      const result = await LoanService.handleRepaymentPromptCallback(req.body);
+      res.status(200).json({ success: true, data: result });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 export default new LoanController();

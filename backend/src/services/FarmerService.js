@@ -1,3 +1,4 @@
+import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -15,11 +16,13 @@ class FarmerService {
    */
   async registerFarmer({ fullName, nationalId, phoneNumber, cooperativeId }) {
     // Check for duplicate national ID
-    const existing = await db
-      .collection(FARMERS_COLLECTION)
-      .where('nationalId', '==', nationalId)
-      .limit(1)
-      .get();
+    const existing = await getDocs(
+      query(
+        collection(db, FARMERS_COLLECTION),
+        where('nationalId', '==', nationalId),
+        limit(1)
+      )
+    );
 
     if (!existing.empty) {
       const err = new Error('A farmer with this National ID is already registered.');
@@ -42,7 +45,7 @@ class FarmerService {
       updatedAt: now,
     };
 
-    await db.collection(FARMERS_COLLECTION).doc(farmerId).set(farmer);
+    await setDoc(doc(db, FARMERS_COLLECTION, farmerId), farmer);
     return farmer;
   }
 
@@ -50,23 +53,22 @@ class FarmerService {
    * Get a farmer by ID.
    */
   async getFarmerById(farmerId) {
-    const doc = await db.collection(FARMERS_COLLECTION).doc(farmerId).get();
-    if (!doc.exists) {
+    const docSnap = await getDoc(doc(db, FARMERS_COLLECTION, farmerId));
+    if (!docSnap.exists()) {
       const err = new Error('Farmer not found.');
       err.statusCode = 404;
       throw err;
     }
-    return doc.data();
+    return docSnap.data();
   }
 
   /**
    * List all farmers belonging to a cooperative.
    */
   async listFarmersByCooperative(cooperativeId) {
-    const snapshot = await db
-      .collection(FARMERS_COLLECTION)
-      .where('cooperativeId', '==', cooperativeId)
-      .get();
+    const snapshot = await getDocs(
+      query(collection(db, FARMERS_COLLECTION), where('cooperativeId', '==', cooperativeId))
+    );
 
     return snapshot.docs.map((doc) => doc.data());
   }
@@ -75,9 +77,9 @@ class FarmerService {
    * Update farmer profile (phone, status, M-Pesa verification, etc.).
    */
   async updateFarmer(farmerId, updates) {
-    const docRef = db.collection(FARMERS_COLLECTION).doc(farmerId);
-    const doc = await docRef.get();
-    if (!doc.exists) {
+    const docRef = doc(db, FARMERS_COLLECTION, farmerId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
       const err = new Error('Farmer not found.');
       err.statusCode = 404;
       throw err;
@@ -92,8 +94,8 @@ class FarmerService {
     }
     sanitized.updatedAt = new Date().toISOString();
 
-    await docRef.update(sanitized);
-    return { ...doc.data(), ...sanitized };
+    await updateDoc(docRef, sanitized);
+    return { ...docSnap.data(), ...sanitized };
   }
 
   /**

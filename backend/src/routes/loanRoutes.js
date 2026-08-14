@@ -6,6 +6,31 @@ import LoanController from '../controllers/LoanController.js';
 const router = Router();
 
 /**
+ * POST /api/loans/loop-repayment-callback
+ * LOOP repayment completion callback.
+ */
+router.post('/loop-repayment-callback', (req, res, next) =>
+  LoanController.handleLoopRepaymentCallback(req, res, next)
+);
+
+/**
+ * POST /api/loans/:loanId/repayment-prompt
+ * Prompt a farmer to repay a specific loan using LOOP Prompt.
+ */
+router.post(
+  '/:loanId/repayment-prompt',
+  [
+    param('loanId').notEmpty().withMessage('Loan ID is required.'),
+    body('amount').optional().isFloat({ gt: 0 }).withMessage('Amount must be a positive number.'),
+    body('mobileNo').optional().notEmpty().withMessage('Mobile number cannot be empty.'),
+    body('merchantTill').optional().notEmpty().withMessage('Merchant till cannot be empty.'),
+    body('callBackUrl').optional().isURL({ require_tld: false }).withMessage('Callback URL must be a valid URL.'),
+    validate,
+  ],
+  (req, res, next) => LoanController.promptRepayment(req, res, next)
+);
+
+/**
  * POST /api/loans
  * Farmer requests a loan.
  */

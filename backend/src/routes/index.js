@@ -13,7 +13,7 @@ const router = Router();
  * /api/farmers/*   → Farmer registration, profile management
  * /api/produce/*   → Produce delivery recording, history, stats
  * /api/credit/*    → Credit intelligence engine (score, profile)
- * /api/loans/*     → Loan lifecycle (request, approve, disburse)
+ * /api/loans/*     → Loan lifecycle, repayment prompts, and callbacks
  * /api/payouts/*   → Produce payouts with automated loan recovery
  */
 router.use('/farmers', farmerRoutes);

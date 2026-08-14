@@ -1,8 +1,10 @@
+import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where, orderBy } from 'firebase/firestore';
 import { db } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 import CreditEngineService from './CreditEngineService.js';
 import LoopAdapter from './LoopAdapter.js';
 import FarmerService from './FarmerService.js';
+import env from '../config/env.js';
 
 const LOANS_COLLECTION = 'loans';
 
@@ -66,7 +68,7 @@ class LoanService {
       createdAt: now,
     };
 
-    await db.collection(LOANS_COLLECTION).doc(loanId).set(loan);
+    await setDoc(doc(db, LOANS_COLLECTION, loanId), loan);
     return { loan, creditProfile };
   }
 
@@ -78,16 +80,16 @@ class LoanService {
    * @param {number} [approvedAmount] - Amount approved (defaults to requested amount)
    */
   async processLoanDecision(loanId, action, approvedAmount = null) {
-    const docRef = db.collection(LOANS_COLLECTION).doc(loanId);
-    const doc = await docRef.get();
+    const docRef = doc(db, LOANS_COLLECTION, loanId);
+    const docSnap = await getDoc(docRef);
 
-    if (!doc.exists) {
+    if (!docSnap.exists()) {
       const err = new Error('Loan not found.');
       err.statusCode = 404;
       throw err;
     }
 
-    const loan = doc.data();
+    const loan = docSnap.data();
 
     if (loan.status !== 'PENDING') {
       const err = new Error(`Loan is already ${loan.status}. Only PENDING loans can be processed.`);
@@ -96,7 +98,7 @@ class LoanService {
     }
 
     if (action === 'REJECT') {
-      await docRef.update({ status: 'REJECTED' });
+      await updateDoc(docRef, { status: 'REJECTED' });
       return { ...loan, status: 'REJECTED' };
     }
 
@@ -120,7 +122,7 @@ class LoanService {
         disbursedAt: new Date().toISOString(),
       };
 
-      await docRef.update(updatedLoan);
+      await updateDoc(docRef, updatedLoan);
       return { ...loan, ...updatedLoan, loopResult };
     }
 
@@ -133,24 +135,26 @@ class LoanService {
    * Get a loan by ID.
    */
   async getLoanById(loanId) {
-    const doc = await db.collection(LOANS_COLLECTION).doc(loanId).get();
-    if (!doc.exists) {
+    const docSnap = await getDoc(doc(db, LOANS_COLLECTION, loanId));
+    if (!docSnap.exists()) {
       const err = new Error('Loan not found.');
       err.statusCode = 404;
       throw err;
     }
-    return doc.data();
+    return docSnap.data();
   }
 
   /**
    * Get all loans for a farmer.
    */
   async getLoansByFarmer(farmerId) {
-    const snapshot = await db
-      .collection(LOANS_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, LOANS_COLLECTION),
+        where('farmerId', '==', farmerId),
+        orderBy('createdAt', 'desc')
+      )
+    );
     return snapshot.docs.map((doc) => doc.data());
   }
 
@@ -158,11 +162,13 @@ class LoanService {
    * Get all loans for a cooperative.
    */
   async getLoansByCooperative(cooperativeId) {
-    const snapshot = await db
-      .collection(LOANS_COLLECTION)
-      .where('cooperativeId', '==', cooperativeId)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, LOANS_COLLECTION),
+        where('cooperativeId', '==', cooperativeId),
+        orderBy('createdAt', 'desc')
+      )
+    );
     return snapshot.docs.map((doc) => doc.data());
   }
 
@@ -174,11 +180,11 @@ class LoanService {
    * @param {number} amount - Amount to deduct from outstanding balance
    */
   async reduceOutstandingBalance(loanId, amount) {
-    const docRef = db.collection(LOANS_COLLECTION).doc(loanId);
-    const doc = await docRef.get();
-    if (!doc.exists) return;
+    const docRef = doc(db, LOANS_COLLECTION, loanId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
 
-    const loan = doc.data();
+    const loan = docSnap.data();
     const newBalance = parseFloat(Math.max(0, loan.outstandingBalance - amount).toFixed(2));
     const updates = { outstandingBalance: newBalance };
 
@@ -186,7 +192,7 @@ class LoanService {
       updates.status = 'REPAID';
     }
 
-    await docRef.update(updates);
+    await updateDoc(docRef, updates);
     return { ...loan, ...updates };
   }
 
@@ -194,11 +200,13 @@ class LoanService {
    * Get active (disbursed, non-repaid) loans for a farmer.
    */
   async _getActiveLoans(farmerId) {
-    const snapshot = await db
-      .collection(LOANS_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .where('status', '==', 'DISBURSED')
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, LOANS_COLLECTION),
+        where('farmerId', '==', farmerId),
+        where('status', '==', 'DISBURSED')
+      )
+    );
     return snapshot.docs.map((doc) => doc.data());
   }
 
@@ -212,6 +220,145 @@ class LoanService {
     return {
       activeLoans,
       totalOutstanding: parseFloat(totalOutstanding.toFixed(2)),
+    };
+  }
+
+  /**
+   * Trigger a LOOP repayment prompt for a specific loan.
+   * Defaults to the farmer's phone number, current outstanding balance,
+   * configured merchant till, and repayment callback URL.
+   */
+  async promptRepaymentForLoan(
+    loanId,
+    {
+      mobileNo = null,
+      amount = null,
+      reason = null,
+      merchantTill = null,
+      callBackUrl = null,
+      txnReference = null,
+    } = {}
+  ) {
+    const docRef = doc(db, LOANS_COLLECTION, loanId);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      const err = new Error('Loan not found.');
+      err.statusCode = 404;
+      throw err;
+    }
+
+    const loan = docSnap.data();
+    const farmer = mobileNo ? { phoneNumber: mobileNo } : await FarmerService.getFarmerById(loan.farmerId);
+    const promptAmount = Number(amount ?? loan.outstandingBalance ?? loan.requestedAmount ?? 0);
+
+    if (!Number.isFinite(promptAmount) || promptAmount <= 0) {
+      const err = new Error('Repayment prompt amount must be greater than zero.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const promptReason =
+      reason ||
+      `Loan repayment for loan ${loan.loanId} at cooperative ${loan.cooperativeId}`;
+
+    const result = await LoopAdapter.promptLoanRepayment({
+      merchantTill: merchantTill || env.LOOP_MERCHANT_TILL,
+      mobileNo: farmer.phoneNumber,
+      amount: promptAmount,
+      reason: promptReason,
+      callBackUrl: callBackUrl || env.LOOP_REPAYMENT_CALLBACK_URL || env.LOOP_CALLBACK_URL,
+      txnReference,
+    });
+
+    const promptRecord = {
+      repaymentPromptTxnReference: result.txnReference,
+      repaymentPromptMerchantTill: merchantTill || env.LOOP_MERCHANT_TILL,
+      repaymentPromptMobileNo: farmer.phoneNumber,
+      repaymentPromptAmount: promptAmount,
+      repaymentPromptReason: promptReason,
+      repaymentPromptStatus: result.success ? 'REQUESTED' : 'FAILED',
+      repaymentPromptRequestedAt: new Date().toISOString(),
+      repaymentPromptLastResponse: result.rawResponse,
+    };
+
+    await updateDoc(docRef, promptRecord);
+
+    return {
+      loanId,
+      prompt: promptRecord,
+      loopResult: result,
+    };
+  }
+
+  /**
+   * Handle the asynchronous LOOP callback for a repayment prompt.
+   * Marks the prompt completed/failed and reduces the outstanding balance
+   * when a successful payment confirmation is received.
+   */
+  async handleRepaymentPromptCallback(payload) {
+    const parsed = LoopAdapter.parseRepaymentPromptCallback(payload);
+
+    if (!parsed.txnReference) {
+      const err = new Error('Missing transaction reference in LOOP repayment callback.');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const snapshot = await getDocs(
+      query(
+        collection(db, LOANS_COLLECTION),
+        where('repaymentPromptTxnReference', '==', parsed.txnReference),
+        limit(1)
+      )
+    );
+
+    if (snapshot.empty) {
+      return { acknowledged: true, found: false };
+    }
+
+    const loanDoc = snapshot.docs[0];
+    const loan = loanDoc.data();
+    const docRef = doc(db, LOANS_COLLECTION, loan.loanId);
+
+    if (
+      loan.repaymentPromptStatus === 'COMPLETED' &&
+      loan.repaymentPromptCallbackTxnReference === parsed.txnReference
+    ) {
+      return {
+        acknowledged: true,
+        found: true,
+        loanId: loan.loanId,
+        alreadyProcessed: true,
+      };
+    }
+
+    const completedAt = new Date().toISOString();
+    const updates = {
+      repaymentPromptStatus: parsed.isSuccess ? 'COMPLETED' : 'FAILED',
+      repaymentPromptCallbackTxnReference: parsed.txnReference,
+      repaymentPromptCallbackReceivedAt: completedAt,
+      repaymentPromptCallbackPayload: parsed.rawPayload,
+      repaymentPromptCallbackMessage: parsed.message,
+    };
+
+    await updateDoc(docRef, updates);
+
+    if (parsed.isSuccess) {
+      const repaymentAmount =
+        parsed.amount > 0 ? parsed.amount : loan.repaymentPromptAmount || loan.outstandingBalance || 0;
+
+      if (repaymentAmount > 0) {
+        await this.reduceOutstandingBalance(loan.loanId, repaymentAmount);
+      }
+    }
+
+    return {
+      acknowledged: true,
+      found: true,
+      loanId: loan.loanId,
+      repaymentStatus: updates.repaymentPromptStatus,
+      transactionRef: parsed.txnReference,
     };
   }
 }
