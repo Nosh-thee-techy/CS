@@ -21,7 +21,7 @@ export function kaliReply(text, { profile, locale } = {}) {
     return profile?.voiceGreetingText || (profile ? t.helloNamed(profile.farmerName) : t.hello);
   }
 
-  if (hasAny(q, ["who are you", "your name", "wewe nani", "jina"])) {
+  if (hasAny(q, ["who are you", "your name", "wewe nani", "jina", "liloo", "kali"])) {
     return t.who;
   }
 
@@ -62,9 +62,9 @@ export function kaliReply(text, { profile, locale } = {}) {
 }
 
 const EN = {
-  hello: "Hi, I'm Kali from KaLI Coop. Ask me about your score, a loan, or how to improve.",
-  helloNamed: (name) => `Hi ${name}. I'm Kali. Ask me about your score, a loan, or what to do next.`,
-  who: "I'm Kali, your KaLI Coop helper. I can talk or chat. I only repeat what this app already shows — I don't change your score.",
+  hello: "Hi, I'm LiLoo from KaLI Coop. Ask me about your score, a loan, or how to improve.",
+  helloNamed: (name) => `Hi ${name}. I'm LiLoo. Ask me about your score, a loan, or what to do next.`,
+  who: "I'm LiLoo, your KaLI Coop helper. I can talk or chat. I only repeat what this app already shows — I don't change your score.",
   needLookup: "Look yourself up first with your member number, phone, or national ID. Then I can talk about your score.",
   lookup: "No login. On the first screen, enter your member number, phone, or ID, then tap Check my score.",
   help: "I can explain your score, how much you qualify to borrow, how to apply, how to pay back, and the steps on Improve. What do you want to know?",
@@ -97,9 +97,9 @@ const EN = {
 };
 
 const SW = {
-  hello: "Habari, mimi ni Kali wa KaLI Coop. Niulize kuhusu alama, mkopo, au jinsi ya kuboresha.",
-  helloNamed: (name) => `Habari ${name}. Mimi ni Kali. Niulize kuhusu alama, mkopo, au hatua inayofuata.`,
-  who: "Mimi ni Kali, msaidizi wa KaLI Coop. Naweza kuzungumza au kuandika. Narudia tu kinachoonekana kwenye programu — sibadilishi alama yako.",
+  hello: "Habari, mimi ni LiLoo wa KaLI Coop. Niulize kuhusu alama, mkopo, au jinsi ya kuboresha.",
+  helloNamed: (name) => `Habari ${name}. Mimi ni LiLoo. Niulize kuhusu alama, mkopo, au hatua inayofuata.`,
+  who: "Mimi ni LiLoo, msaidizi wa KaLI Coop. Naweza kuzungumza au kuandika. Narudia tu kinachoonekana kwenye programu — sibadilishi alama yako.",
   needLookup: "Tafuta kwanza kwa namba ya mwanachama, simu, au kitambulisho. Kisha nitaweza kuongea kuhusu alama yako.",
   lookup: "Hauhitaji kuingia. Kwenye skrini ya kwanza, weka namba ya mwanachama, simu, au kitambulisho, kisha gusa Angalia alama yangu.",
   help: "Naweza kueleza alama yako, kiasi unachostahili, jinsi ya kuomba, jinsi ya kulipa, na hatua za Boresha. Unataka kujua nini?",

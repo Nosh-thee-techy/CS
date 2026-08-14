@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher.jsx";
 import PillButton from "../components/PillButton.jsx";
+import { readLastLookup, saveLastLookup } from "../api/readiness.js";
 import { useReadiness } from "../context/ReadinessContext.jsx";
 
 const FEATURES = [
@@ -12,8 +13,18 @@ const FEATURES = [
 
 export default function LookupScreen() {
   const { t } = useTranslation();
-  const { lookupFarmer, loading, error } = useReadiness();
-  const [value, setValue] = useState("");
+  const { lookupFarmer, loading, error, lookup } = useReadiness();
+  const [value, setValue] = useState(() => lookup || readLastLookup() || "");
+
+  useEffect(() => {
+    if (lookup) setValue(lookup);
+  }, [lookup]);
+
+  function onChange(event) {
+    const next = event.target.value;
+    setValue(next);
+    saveLastLookup(next);
+  }
 
   function onSubmit(event) {
     event.preventDefault();
@@ -57,7 +68,7 @@ export default function LookupScreen() {
           <span className="mb-2 block text-sm font-medium text-mute">{t("lookup.fieldLabel")}</span>
           <input
             value={value}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={onChange}
             inputMode="text"
             autoCapitalize="characters"
             autoComplete="off"

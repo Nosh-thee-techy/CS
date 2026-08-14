@@ -2,9 +2,12 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { useTranslation } from "react-i18next";
 import {
   cacheProfile,
+  clearLookupQuery,
   completeAction as postComplete,
   fetchReadiness,
+  persistLookupQuery,
   readCachedProfile,
+  saveLastLookup,
   requestOtp as postOtp,
   submitLoan as postLoan,
 } from "../api/readiness.js";
@@ -39,13 +42,13 @@ export function ReadinessProvider({ children }) {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const query = params.get("lookup");
+    const query = (params.get("lookup") || "").trim();
     const nextTab = params.get("tab");
     if (nextTab === "score" || nextTab === "loan" || nextTab === "improve") {
       setTab(nextTab);
     }
     if (query) {
-      lookupFarmer(query);
+      lookupFarmer(query, { keepTab: Boolean(nextTab) });
     }
     // Deep-link from Lima na Loop — run once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,9 +73,12 @@ export function ReadinessProvider({ children }) {
     return next;
   }
 
-  async function lookupFarmer(value) {
+  async function lookupFarmer(value, { keepTab = false } = {}) {
     const query = value.trim();
+    if (!query) return;
     setLookup(query);
+    saveLastLookup(query);
+    persistLookupQuery(query);
     setLoading(true);
     setError("");
     setFromCache(false);
@@ -80,10 +86,9 @@ export function ReadinessProvider({ children }) {
     setOtpHint("");
     setPayoutError("");
     setPayoutNotice("");
-    setTab("score");
 
     try {
-      await loadProfile(query);
+      await loadProfile(query, { keepTab });
     } catch (err) {
       const cached = readCachedProfile(query);
       if (cached?.profile) {
@@ -285,7 +290,6 @@ export function ReadinessProvider({ children }) {
   }
 
   function reset() {
-    setLookup("");
     setProfile(null);
     setTab("score");
     setError("");
@@ -295,6 +299,7 @@ export function ReadinessProvider({ children }) {
     setOtpHint("");
     setPayoutError("");
     setPayoutNotice("");
+    clearLookupQuery();
   }
 
   const value = useMemo(

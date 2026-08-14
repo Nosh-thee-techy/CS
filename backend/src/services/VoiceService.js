@@ -54,7 +54,7 @@ class VoiceService {
         ? `<GetDigits timeout="20" finishOnKey="#" callbackUrl="${xmlEscape(digitUrl)}">`
         : '<GetDigits timeout="20" finishOnKey="#">';
       return response(
-        `${say(`Hello ${farmer.fullName}. This is Kali on Lima na Loop.`)}${getDigits}${say('Press 1 for your score. 2 for next steps. 3 for loan. Hash to finish.')}</GetDigits>`,
+        `${say(`Hello ${farmer.fullName}. This is LiLoo on Lima na Loop.`)}${getDigits}${say('Press 1 for your score. 2 for next steps. 3 for loan. Hash to finish.')}</GetDigits>`,
       );
     }
 

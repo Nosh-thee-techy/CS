@@ -13,7 +13,7 @@ Lookup by member number, phone, or national ID. Stateless per visit.
 - Display-ready readiness UI (Score / Loan / Improve)
 - Localization (en, sw; more later via i18n keys — never hardcode copy)
 - Action self-report forwarding
-- Kali voice greeting playback for the selected locale
+- LiLoo voice greeting playback for the selected locale
 
 ## This repo does NOT own
 

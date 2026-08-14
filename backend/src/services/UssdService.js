@@ -7,7 +7,7 @@ import {
 } from './ReadinessService.js';
 import { issueOtp, verifyOtp } from '../../../my-readiness/backend/src/lib/otp.js';
 import { sendSms, isAfricasTalkingReady, toMsisdn } from '../clients/africasTalking.js';
-import { t, actionTitle, ussdLocale } from '../lib/ussdCopy.js';
+import { t, actionTitle, ussdLocale, LANG_MENU, langFromDigit } from '../lib/ussdCopy.js';
 
 const LOOKUP_MS = 2500;
 
@@ -46,7 +46,7 @@ function sessionOf(sessionId) {
     if (now - row.touchedAt > SESSION_TTL_MS) sessions.delete(id);
   }
   if (!sessions.has(sessionId)) {
-    sessions.set(sessionId, { lang: 'en', screen: 'main', touchedAt: now });
+    sessions.set(sessionId, { lang: null, screen: 'lang', touchedAt: now });
   }
   const row = sessions.get(sessionId);
   row.touchedAt = now;
@@ -107,7 +107,20 @@ class UssdService {
     try {
       const farmer = await farmerFromPhone(phoneNumber);
       if (!farmer) {
+        if (!session.lang) {
+          if (!input) {
+            session.screen = 'lang';
+            return con(LANG_MENU);
+          }
+          const picked = langFromDigit(input);
+          if (!picked) return con(LANG_MENU);
+          session.lang = picked;
+        }
         return end(t(session.lang).unregistered);
+      }
+
+      if (session.screen === 'lang' || !session.lang) {
+        return this._pickLang(session, farmer, input);
       }
 
       if (steps.length === 0) {
@@ -127,15 +140,26 @@ class UssdService {
       return this._main(session, farmer, input);
     } catch (error) {
       console.warn('USSD handler error:', error.message);
-      return end(t(session.lang).error);
+      return end(t(session.lang || 'en').error);
     }
+  }
+
+  _pickLang(session, farmer, input) {
+    if (!input) {
+      session.screen = 'lang';
+      return con(LANG_MENU);
+    }
+    const lang = langFromDigit(input);
+    if (!lang) return con(LANG_MENU);
+    session.lang = lang;
+    session.screen = 'main';
+    return con(t(lang).main(farmer.fullName || 'farmer'));
   }
 
   async _main(session, farmer, input) {
     if (input === '0') {
-      session.lang = session.lang === 'sw' ? 'en' : 'sw';
-      session.screen = 'main';
-      return con(t(session.lang).main(farmer.fullName || 'farmer'));
+      session.lang = null;
+      return this._pickLang(session, farmer, '');
     }
     if (input === '1') {
       return this._score(farmer, t(session.lang));
@@ -174,7 +198,7 @@ class UssdService {
           actionStatus(action, copy),
         ),
       );
-      return con(`${copy.improveHeader}\n${lines.join('\n')}\n0. Back`);
+      return con(`${copy.improveHeader}\n${lines.join('\n')}\n0. ${copy.back}`);
     }
 
     if (input === '0') {

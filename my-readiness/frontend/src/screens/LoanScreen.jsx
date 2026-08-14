@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CtaDock } from "../components/CtaDock.jsx";
 import PillButton from "../components/PillButton.jsx";
 import { summarizeLoan } from "../lib/loanBalance.js";
 import { useReadiness } from "../context/ReadinessContext.jsx";
@@ -116,16 +117,19 @@ function ApplyWizard({ profile, eligible, hasDebt }) {
               <p className="mt-2 text-sm leading-relaxed text-ember-glow">{t("loan.payFirst")}</p>
             )}
           </section>
-          <HowItWorks />
-          {eligible ? (
-            <PillButton type="button" variant="ember" onClick={() => setStep(1)}>
-              {t("loan.next")}
-            </PillButton>
-          ) : (
+          {!eligible && (
             <p className="rounded-[20px] border border-white/15 bg-white/5 px-4 py-3 text-sm leading-relaxed text-white">
               {hasDebt ? t("loan.payFirst") : t("loan.lockedBody")}
             </p>
           )}
+          <HowItWorks />
+          <CtaDock>
+            <PillButton type="button" variant="ember" disabled={!eligible} onClick={() => setStep(1)}>
+              {eligible && max
+                ? t("score.applyCta", { amount: max.toLocaleString("en-KE") })
+                : t("loan.apply")}
+            </PillButton>
+          </CtaDock>
         </div>
       )}
 
@@ -148,14 +152,16 @@ function ApplyWizard({ profile, eligible, hasDebt }) {
           </label>
           <p className="text-sm leading-relaxed text-mute">{t("loan.capNote")}</p>
 
-          <div className="flex gap-2">
-            <BackButton onClick={() => setStep(0)} />
-            <div className="min-w-0 flex-1">
-              <PillButton type="button" variant="ember" disabled={!max} onClick={() => setStep(2)}>
-                {t("loan.next")}
-              </PillButton>
+          <CtaDock>
+            <div className="flex gap-2">
+              <BackButton onClick={() => setStep(0)} />
+              <div className="min-w-0 flex-1">
+                <PillButton type="button" variant="ember" disabled={!max} onClick={() => setStep(2)}>
+                  {t("loan.next")}
+                </PillButton>
+              </div>
             </div>
-          </div>
+          </CtaDock>
         </div>
       )}
 
@@ -177,14 +183,16 @@ function ApplyWizard({ profile, eligible, hasDebt }) {
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <BackButton onClick={() => setStep(1)} />
-            <div className="min-w-0 flex-1">
-              <PillButton type="button" variant="ember" onClick={() => setStep(3)}>
-                {t("loan.next")}
-              </PillButton>
+          <CtaDock>
+            <div className="flex gap-2">
+              <BackButton onClick={() => setStep(1)} />
+              <div className="min-w-0 flex-1">
+                <PillButton type="button" variant="ember" onClick={() => setStep(3)}>
+                  {t("loan.next")}
+                </PillButton>
+              </div>
             </div>
-          </div>
+          </CtaDock>
         </div>
       )}
 
@@ -209,14 +217,21 @@ function ApplyWizard({ profile, eligible, hasDebt }) {
             <p className="rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white">{loanError}</p>
           )}
 
-          <div className="flex gap-2">
-            <BackButton onClick={() => setStep(2)} />
-            <div className="min-w-0 flex-1">
-              <PillButton type="submit" variant="ember" disabled={loanBusy || !max}>
-                {loanBusy ? t("loan.submitting") : t("loan.submit")}
-              </PillButton>
+          <CtaDock>
+            <div className="flex gap-2">
+              <BackButton onClick={() => setStep(2)} />
+              <div className="min-w-0 flex-1">
+                <PillButton
+                  type="button"
+                  variant="ember"
+                  disabled={loanBusy || !max}
+                  onClick={() => applyForLoan(purpose, "", max)}
+                >
+                  {loanBusy ? t("loan.submitting") : t("loan.submit")}
+                </PillButton>
+              </div>
             </div>
-          </div>
+          </CtaDock>
         </form>
       )}
     </div>
@@ -351,9 +366,11 @@ function RepaySection({ loan, onRepay }) {
         <p className="rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white">{error}</p>
       )}
 
-      <PillButton type="submit" variant="ember" disabled={busy || !amount}>
-        {busy ? t("repay.sending") : t("repay.submit")}
-      </PillButton>
+      <CtaDock>
+        <PillButton type="button" variant="ember" disabled={busy || !amount} onClick={onSubmit}>
+          {busy ? t("repay.sending") : t("repay.submit")}
+        </PillButton>
+      </CtaDock>
     </form>
   );
 }

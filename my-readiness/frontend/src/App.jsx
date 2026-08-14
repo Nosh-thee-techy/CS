@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import BottomNav from "./components/BottomNav.jsx";
+import { CtaDockHost } from "./components/CtaDock.jsx";
 import DeviceFrame from "./components/DeviceFrame.jsx";
 import KaliSheet, { KaliToggle } from "./components/KaliAgent.jsx";
 import LanguageSwitcher from "./components/LanguageSwitcher.jsx";
@@ -45,41 +46,43 @@ export default function App() {
 
   return (
     <DeviceFrame>
-      <div className="device-scroll">
-        {booting ? (
-          <SplashScreen onDone={() => setBooting(false)} />
-        ) : !profile && !loading ? (
-          <LookupScreen />
-        ) : (
-          <div className="px-5 pb-28 pt-12">
-            <div className="mb-4 flex justify-end">
-              <LanguageSwitcher />
-            </div>
-            {loading && !profile ? (
-              <ScoreSkeleton />
-            ) : (
-              <>
-                {tab === "score" && <ScoreScreen />}
-                {tab === "loan" && <LoanScreen />}
-                {tab === "improve" && <ImproveScreen />}
-              </>
-            )}
-          </div>
-        )}
-      </div>
-      {!booting && !kaliOpen && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-end gap-2 px-4 pb-[max(1.75rem,env(safe-area-inset-bottom))]">
-          {showNav && (
-            <div className="pointer-events-auto min-w-0 flex-1">
-              <BottomNav tab={tab} onChange={setTab} />
+      <CtaDockHost>
+        <div className="device-scroll">
+          {booting ? (
+            <SplashScreen onDone={() => setBooting(false)} />
+          ) : !profile && !loading ? (
+            <LookupScreen />
+          ) : (
+            <div className="px-5 pb-[calc(var(--nav-stack)+5.5rem)] pt-12">
+              <div className="mb-4 flex justify-end">
+                <LanguageSwitcher />
+              </div>
+              {loading && !profile ? (
+                <ScoreSkeleton />
+              ) : (
+                <>
+                  {tab === "score" && <ScoreScreen />}
+                  {tab === "loan" && <LoanScreen />}
+                  {tab === "improve" && <ImproveScreen />}
+                </>
+              )}
             </div>
           )}
-          <div className={`pointer-events-auto ${showNav ? "" : "ml-auto"}`}>
-            <KaliToggle onOpen={() => setKaliOpen(true)} />
-          </div>
         </div>
-      )}
-      {kaliOpen && <KaliSheet onClose={() => setKaliOpen(false)} />}
+        {!booting && !kaliOpen && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-end gap-2 px-4 pb-[max(1.75rem,env(safe-area-inset-bottom))]">
+            {showNav && (
+              <div className="pointer-events-auto min-w-0 flex-1">
+                <BottomNav tab={tab} onChange={setTab} />
+              </div>
+            )}
+            <div className={`pointer-events-auto ${showNav ? "" : "ml-auto"}`}>
+              <KaliToggle onOpen={() => setKaliOpen(true)} />
+            </div>
+          </div>
+        )}
+        {kaliOpen && <KaliSheet onClose={() => setKaliOpen(false)} />}
+      </CtaDockHost>
     </DeviceFrame>
   );
 }

@@ -24,7 +24,7 @@ function SpeechEngine(): (new () => { start: () => void; stop: () => void; lang:
 }
 
 function welcomeCopy(shortCode: string, voiceNumber: string) {
-  return `AT sandbox\nUSSD  ${shortCode || 'set AT_SHORT_CODE'}\nVoice  ${voiceNumber || 'set AT_VOICE_NUMBER'}\n\nGreen = Kali voice\nRed = hang up`;
+  return `AT sandbox\nUSSD  ${shortCode || 'set AT_SHORT_CODE'}\nVoice  ${voiceNumber || 'set AT_VOICE_NUMBER'}\n\nGreen = LiLoo voice\nRed = hang up`;
 }
 
 export default function PhoneSimulator() {
@@ -144,17 +144,17 @@ export default function PhoneSimulator() {
     setDialed(true);
     setEnded(false);
     setDial(voiceNumber);
-    setDisplay(`Calling Kali…\n${voiceNumber}`);
+    setDisplay(`Calling LiLoo…\n${voiceNumber}`);
     setLog([]);
     try {
       const data = await loadProfile(locale);
       const hello = data?.voiceGreetingText
         || kaliReply('hello', { profile: data, locale });
-      setDisplay(`Kali · ${data?.farmerName || 'KaLI Coop'}\n\n${hello}\n\n1 Score  2 Improve  3 Loan\n0 Lugha  # Hang up`);
+      setDisplay(`LiLoo · ${data?.farmerName || 'KaLI Coop'}\n\n${hello}\n\n1 Score  2 Improve  3 Loan\n0 Lugha  # Hang up`);
       setLog([{ who: 'kali', text: hello }]);
       speak(hello, locale);
     } catch {
-      const fallback = 'Hi, I am Kali. Look up failed. Try USSD *384*11400# or My Readiness.';
+      const fallback = 'Hi, I am LiLoo. Look up failed. Try USSD *384*11400# or My Readiness.';
       setDisplay(fallback);
       speak(fallback, locale);
     }
@@ -163,7 +163,7 @@ export default function PhoneSimulator() {
   function askKali(text: string, lang = locale, nextProfile = profile) {
     const answer = kaliReply(text, { profile: nextProfile, locale: lang });
     setLog((rows) => [...rows, { who: 'you', text }, { who: 'kali', text: answer }]);
-    setDisplay(`You: ${text}\n\nKali: ${answer}\n\n1 Score  2 Improve  3 Loan\nTalk or tap an example →`);
+    setDisplay(`You: ${text}\n\nLiLoo: ${answer}\n\n1 Score  2 Improve  3 Loan\nTalk or tap an example →`);
     speak(answer, lang);
   }
 
@@ -301,7 +301,7 @@ export default function PhoneSimulator() {
             ))}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
-            <button type="button" className="phone-key phone-key-call" onClick={startCall} aria-label="Call Kali">
+            <button type="button" className="phone-key phone-key-call" onClick={startCall} aria-label="Call LiLoo">
               <Phone size={16} /> Call
             </button>
             <button type="button" className="phone-key phone-key-end" onClick={hangUp} aria-label="Hang up">
@@ -343,13 +343,13 @@ export default function PhoneSimulator() {
 
         <div className="card-clean">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Volume2 size={16} /> Talk to Kali</h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Volume2 size={16} /> Talk to LiLoo</h3>
             <button type="button" className="btn btn-orange btn-sm" onClick={toggleListen}>
               <Mic size={14} /> {listening ? 'Stop' : 'Speak'}
             </button>
           </div>
           <p style={{ marginTop: 8 }}>
-            In this desk, Kali speaks in the browser. The AT sandbox Voice number uses POST /api/voice (XML) in their simulator — not a live Safaricom call.
+            In this desk, LiLoo speaks in the browser. The AT sandbox Voice number uses POST /api/voice (XML) in their simulator — not a live Safaricom call.
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 12 }}>
             {EXAMPLES.map((ex) => (
@@ -377,7 +377,7 @@ export default function PhoneSimulator() {
             <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
               {log.slice(-6).map((row, i) => (
                 <div key={`${row.who}-${i}`} style={{ fontSize: '0.82rem' }}>
-                  <strong>{row.who === 'kali' ? 'Kali' : 'You'}:</strong> {row.text}
+                  <strong>{row.who === 'kali' ? 'LiLoo' : 'You'}:</strong> {row.text}
                 </div>
               ))}
             </div>

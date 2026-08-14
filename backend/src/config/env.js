@@ -1,5 +1,9 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-dotenv.config();
+
+const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+dotenv.config({ path: path.join(backendRoot, '.env') });
 
 const env = {
   // Server
@@ -20,8 +24,8 @@ const env = {
   // Africa's Talking sandbox (USSD + SMS + Voice)
   AT_USERNAME: process.env.AT_USERNAME || 'sandbox',
   AT_API_KEY: process.env.AT_API_KEY || '',
-  AT_SHORT_CODE: process.env.AT_SHORT_CODE || '',
-  AT_SMS_FROM: process.env.AT_SMS_FROM || '',
+  AT_SHORT_CODE: process.env.AT_SHORT_CODE || process.env.AT_SERVICE_CODE || '',
+  AT_SMS_FROM: process.env.AT_SMS_FROM || process.env.AT_SMS_SHORTCODE || '',
   AT_CALLBACK_SECRET: process.env.AT_CALLBACK_SECRET || '',
   AT_VOICE_NUMBER: process.env.AT_VOICE_NUMBER || '',
   AT_PUBLIC_BASE_URL: process.env.AT_PUBLIC_BASE_URL || '',

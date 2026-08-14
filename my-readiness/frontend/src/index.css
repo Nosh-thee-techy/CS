@@ -30,6 +30,13 @@ body {
   @apply tap flex h-14 w-full items-center justify-center rounded-full text-[17px] font-semibold transition active:scale-[0.99];
 }
 
+.btn-pill:disabled {
+  opacity: 0.42;
+  box-shadow: none;
+  filter: grayscale(0.2);
+  pointer-events: none;
+}
+
 .btn-pill-white {
   @apply btn-pill bg-white text-black;
 }
@@ -79,6 +86,7 @@ body {
 }
 
 .iphone-screen {
+  --nav-stack: calc(5.25rem + max(1.75rem, env(safe-area-inset-bottom)));
   position: relative;
   display: flex;
   flex-direction: column;
@@ -164,6 +172,25 @@ body {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   background: #000;
+}
+
+.cta-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--nav-stack, calc(5.25rem + max(1.75rem, env(safe-area-inset-bottom))));
+  z-index: 32;
+  padding: 1.75rem 1.25rem 0.65rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 42%);
+  pointer-events: none;
+}
+
+.cta-dock:empty {
+  display: none;
+}
+
+.cta-dock > * {
+  pointer-events: auto;
 }
 
 .kali-dock {

@@ -15,6 +15,7 @@ function apiUrl(path) {
 export { apiUrl, API_BASE };
 
 const CACHE_KEY = "my-readiness:last-profile";
+const LAST_LOOKUP_KEY = "my-readiness:last-lookup";
 
 export async function fetchReadiness(lookup, lang) {
   const response = await fetch(
@@ -112,6 +113,44 @@ export function cacheProfile(lookup, profile) {
     CACHE_KEY,
     JSON.stringify({ lookup, profile, savedAt: Date.now() }),
   );
+  saveLastLookup(lookup);
+}
+
+export function saveLastLookup(value) {
+  const next = String(value || "").trim();
+  if (!next) return;
+  try {
+    localStorage.setItem(LAST_LOOKUP_KEY, next);
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+export function readLastLookup() {
+  try {
+    const typed = String(localStorage.getItem(LAST_LOOKUP_KEY) || "").trim();
+    if (typed) return typed;
+    const cached = readCachedProfile();
+    return String(cached?.lookup || "").trim();
+  } catch {
+    return "";
+  }
+}
+
+export function persistLookupQuery(query) {
+  try {
+    const url = new URL(window.location.href);
+    const next = String(query || "").trim();
+    if (next) url.searchParams.set("lookup", next);
+    else url.searchParams.delete("lookup");
+    window.history.replaceState({}, "", url);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearLookupQuery() {
+  persistLookupQuery("");
 }
 
 export function readCachedProfile(lookup) {

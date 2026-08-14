@@ -2,7 +2,7 @@
   "app": {
     "name": "Utayari Wangu",
     "coop": "KaLI Coop",
-    "kali": "Kali"
+    "kali": "LiLoo"
   },
   "splash": {
     "tap": "Gusa kuendelea",
@@ -19,7 +19,7 @@
     "checking": "Tunakutafuta…",
     "hint": "Jaribu KTDA-43456789, 0712345678, au 12345678",
     "language": "Lugha",
-    "languageAsk": "Kali atazungumza lugha hii",
+    "languageAsk": "LiLoo atazungumza lugha hii",
     "features": {
       "score": {
         "title": "Angalia alama yako",
@@ -54,17 +54,17 @@
     "loanTab": "Fungua mkopo"
   },
   "voice": {
-    "play": "Cheza salamu ya Kali",
-    "playing": "Kali anazungumza…",
+    "play": "Cheza salamu ya LiLoo",
+    "playing": "LiLoo anazungumza…",
     "replay": "Cheza tena"
   },
   "kali": {
-    "title": "Kali",
-    "open": "Ongea na Kali",
+    "title": "LiLoo",
+    "open": "Ongea na LiLoo",
     "close": "Funga",
     "ready": "Uliza kwa sauti au andika",
     "listening": "Ninasikiliza…",
-    "speaking": "Kali anazungumza…",
+    "speaking": "LiLoo anazungumza…",
     "placeholder": "Andika ujumbe",
     "send": "Tuma",
     "talk": "Ongea",
@@ -126,6 +126,7 @@
       "other": "Nyingine"
     },
     "next": "Endelea",
+    "apply": "Omba mkopo",
     "back": "Rudi",
     "confirmTitle": "Kagua na utume",
     "confirmAmount": "Unataka",

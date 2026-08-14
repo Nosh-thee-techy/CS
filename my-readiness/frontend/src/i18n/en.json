@@ -2,7 +2,7 @@
   "app": {
     "name": "My Readiness",
     "coop": "KaLI Coop",
-    "kali": "Kali"
+    "kali": "LiLoo"
   },
   "splash": {
     "tap": "Tap to continue",
@@ -19,7 +19,7 @@
     "checking": "Looking you up…",
     "hint": "Try KTDA-43456789, 0712345678, or 12345678",
     "language": "Language",
-    "languageAsk": "Kali will speak this language",
+    "languageAsk": "LiLoo will speak this language",
     "features": {
       "score": {
         "title": "See your score",
@@ -54,17 +54,17 @@
     "loanTab": "Open loan"
   },
   "voice": {
-    "play": "Play Kali greeting",
-    "playing": "Kali is speaking…",
+    "play": "Play LiLoo greeting",
+    "playing": "LiLoo is speaking…",
     "replay": "Play again"
   },
   "kali": {
-    "title": "Kali",
-    "open": "Talk to Kali",
+    "title": "LiLoo",
+    "open": "Talk to LiLoo",
     "close": "Close",
     "ready": "Ask with your voice or type",
     "listening": "Listening…",
-    "speaking": "Kali is speaking…",
+    "speaking": "LiLoo is speaking…",
     "placeholder": "Type a message",
     "send": "Send",
     "talk": "Speak",
@@ -126,6 +126,7 @@
       "other": "Other"
     },
     "next": "Continue",
+    "apply": "Apply for a loan",
     "back": "Back",
     "confirmTitle": "Check and send",
     "confirmAmount": "You are requesting",
