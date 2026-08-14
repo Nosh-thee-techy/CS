@@ -116,7 +116,7 @@ export default function Login() {
               maxWidth: 480,
               fontWeight: 500,
             }}>
-              100% payment transparency and instant working capital for Kenya's <strong>680,000 smallholder tea farmers</strong>.
+              Turning tea deliveries and farm produce into credit access for <strong>680,000 farmers</strong>.
             </p>
           </div>
 
@@ -258,7 +258,7 @@ export default function Login() {
           boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
         }}>
           <div style={{ fontSize: '0.95rem', fontWeight: 500, fontStyle: 'italic', lineHeight: 1.55, marginBottom: 14 }}>
-            "The money received as bonus was deducted by banks and SACCOs without breakdown. With Lima na Loop, we see every shilling before it hits M-Pesa."
+            "I had no formal bank history, but 3 years of consistent tea deliveries gave me a 740 credit score on Lima na Loop. I got my KSh 85,000 input loan approved in minutes."
           </div>
           <div style={{ fontSize: '0.8rem', color: 'var(--loop-orange)', fontWeight: 800 }}>
             — Patrick Langat, Tea Farmer · Bomet County
@@ -267,15 +267,15 @@ export default function Login() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, marginTop: 18, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.15)' }}>
             <div>
               <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 800, fontSize: '1.2rem', color: 'var(--loop-orange)' }}>680,000</div>
-              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>Smallholder Farmers</div>
+              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>Farmers Credit-Scored</div>
             </div>
             <div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 800, fontSize: '1.2rem', color: '#FFFFFF' }}>KSh 4.2B</div>
-              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>Saved in Disputes</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 800, fontSize: '1.2rem', color: '#FFFFFF' }}>KSh 1.8B+</div>
+              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>Financing Unlocked</div>
             </div>
             <div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 800, fontSize: '1.2rem', color: 'var(--loop-orange)' }}>&lt; 60 sec</div>
-              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>M-Pesa Payout Speed</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontWeight: 800, fontSize: '1.2rem', color: 'var(--loop-orange)' }}>&lt; 30 sec</div>
+              <div style={{ fontSize: '0.68rem', opacity: 0.8 }}>Score Generation</div>
             </div>
           </div>
         </div>
