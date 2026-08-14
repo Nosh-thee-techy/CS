@@ -1,4 +1,5 @@
 import env from '../config/env.js';
+import { createHmac } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -22,6 +23,9 @@ class LoopAdapter {
     this.consumerKey = env.LOOP_CONSUMER_KEY;
     this.consumerSecret = env.LOOP_CONSUMER_SECRET;
     this.callbackUrl = env.LOOP_CALLBACK_URL;
+    this.repaymentCallbackUrl = env.LOOP_REPAYMENT_CALLBACK_URL || env.LOOP_CALLBACK_URL;
+    this.merchantTill = env.LOOP_MERCHANT_TILL;
+    this.merchantTillSecret = env.LOOP_MERCHANT_TILL_SECRET;
 
     // Token cache
     this._accessToken = null;
@@ -38,6 +42,10 @@ class LoopAdapter {
   async _getAccessToken() {
     if (this._accessToken && Date.now() < this._tokenExpiresAt - 60000) {
       return this._accessToken;
+    }
+
+    if (!this.consumerKey || !this.consumerSecret) {
+      throw new Error('LOOP consumer key/secret are not configured.');
     }
 
     const credentials = Buffer.from(
@@ -106,6 +114,34 @@ class LoopAdapter {
       status: response.status,
       ok: response.ok,
       data: responseData,
+    };
+  }
+
+  _formatUtcTimestamp(date = new Date()) {
+    return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+  }
+
+  _buildPromptSignature(merchantTill, timestamp, nonce) {
+    if (!this.merchantTillSecret) {
+      throw new Error('LOOP merchant till secret is not configured.');
+    }
+
+    return createHmac('sha256', this.merchantTillSecret)
+      .update(`${merchantTill}|${timestamp}|${nonce}`)
+      .digest('hex');
+  }
+
+  _parsePromptResponse(result) {
+    const body = result?.data || {};
+    const statusCode = Number(body.statusCode ?? result?.status ?? 500);
+
+    return {
+      httpStatus: result?.status ?? null,
+      statusCode,
+      message: body.message || '',
+      data: body.data || {},
+      rawResponse: body,
+      success: statusCode === 200,
     };
   }
 
@@ -212,6 +248,68 @@ class LoopAdapter {
   }
 
   /**
+   * Send a LOOP request-to-pay prompt to a farmer for loan repayment.
+   */
+  async promptLoanRepayment({
+    merchantTill = this.merchantTill,
+    mobileNo,
+    amount,
+    reason,
+    callBackUrl = this.repaymentCallbackUrl,
+    txnReference = uuidv4(),
+  }) {
+    if (!merchantTill) {
+      throw new Error('LOOP merchant till is not configured.');
+    }
+
+    if (!mobileNo) {
+      throw new Error('mobileNo is required for LOOP repayment prompt.');
+    }
+
+    if (!callBackUrl || !/^https:\/\//i.test(callBackUrl)) {
+      throw new Error('LOOP repayment prompt callback URL must be an absolute https URL.');
+    }
+
+    const normalizedAmount = Number(amount);
+    if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+      throw new Error('Repayment prompt amount must be a number greater than zero.');
+    }
+
+    const timestamp = this._formatUtcTimestamp();
+    const nonce = uuidv4().toLowerCase();
+    const signature = this._buildPromptSignature(String(merchantTill), timestamp, nonce);
+
+    const requestBody = {
+      serviceCode: 'NEO_MRCHNT_RTP',
+      txnReference,
+      requestParameters: {
+        merchantTill: String(merchantTill),
+        mobileNo: this._formatPhone(mobileNo),
+        amount: normalizedAmount.toFixed(2),
+        reason: reason || 'Loan repayment prompt',
+        callBackUrl,
+        timestamp,
+        nonce,
+        signature,
+      },
+    };
+
+    const result = await this._request(
+      'POST',
+      '/gateway/loop-prompt/2/services/process-request',
+      requestBody
+    );
+
+    const normalized = this._parsePromptResponse(result);
+
+    return {
+      txnReference,
+      ...normalized,
+      requestBody,
+    };
+  }
+
+  /**
    * Check transaction status on LOOP.
    */
   async getPaymentStatus(transactionRef) {
@@ -247,6 +345,52 @@ class LoopAdapter {
       recipientPhone: payload.phoneNumber || payload.recipientNo || null,
       timestamp: payload.timestamp || new Date().toISOString(),
       rawPayload: payload,
+    };
+  }
+
+  /**
+   * Parse a LOOP repayment prompt callback payload.
+   * Accepts multiple callback shapes so the backend can be resilient
+   * to minor gateway payload differences.
+   */
+  parseRepaymentPromptCallback(payload) {
+    const response = payload?.response || payload?.data?.response || {};
+    const statusCode = Number(
+      payload?.statusCode ??
+        payload?.data?.statusCode ??
+        payload?.response?.statusCode ??
+        response?.statusCode ??
+        0
+    );
+    const serviceTransactionStatus =
+      payload?.serviceTransactionStatus ||
+      payload?.data?.serviceTransactionStatus ||
+      payload?.response?.serviceTransactionStatus ||
+      null;
+    const txnReference =
+      payload?.txnReference ||
+      payload?.requestReference ||
+      payload?.reference ||
+      payload?.transactionRef ||
+      payload?.data?.txnReference ||
+      response?.transactionRef ||
+      null;
+    const amount = Number(
+      payload?.amount ?? payload?.data?.amount ?? response?.totalAmount ?? 0
+    );
+
+    return {
+      txnReference,
+      statusCode,
+      serviceTransactionStatus,
+      amount: Number.isFinite(amount) ? amount : 0,
+      message: payload?.message || payload?.data?.message || response?.rspMessage || '',
+      rawPayload: payload,
+      isSuccess:
+        statusCode === 200 ||
+        serviceTransactionStatus === 'COMPLETED' ||
+        response?.rspMessage === 'SUCCESS' ||
+        response?.rspCode === '00000000',
     };
   }
 

@@ -1,3 +1,4 @@
+import { collection, doc, getDocs, query, setDoc, where, orderBy, writeBatch } from 'firebase/firestore';
 import { db } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -31,7 +32,7 @@ class ProduceService {
       createdAt: now,
     };
 
-    await db.collection(PRODUCE_COLLECTION).doc(recordId).set(record);
+    await setDoc(doc(db, PRODUCE_COLLECTION, recordId), record);
     return record;
   }
 
@@ -39,11 +40,11 @@ class ProduceService {
    * Get produce history for a farmer (optionally filtered by cooperative).
    */
   async getProduceHistory(farmerId, cooperativeId = null) {
-    let query = db.collection(PRODUCE_COLLECTION).where('farmerId', '==', farmerId);
+    let firestoreQuery = query(collection(db, PRODUCE_COLLECTION), where('farmerId', '==', farmerId));
     if (cooperativeId) {
-      query = query.where('cooperativeId', '==', cooperativeId);
+      firestoreQuery = query(firestoreQuery, where('cooperativeId', '==', cooperativeId));
     }
-    const snapshot = await query.orderBy('createdAt', 'desc').get();
+    const snapshot = await getDocs(query(firestoreQuery, orderBy('createdAt', 'desc')));
     return snapshot.docs.map((doc) => doc.data());
   }
 
@@ -52,11 +53,13 @@ class ProduceService {
    * Returns the list and computed gross total.
    */
   async getUnpaidProduce(farmerId) {
-    const snapshot = await db
-      .collection(PRODUCE_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .where('payoutStatus', '==', 'UNPAID')
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, PRODUCE_COLLECTION),
+        where('farmerId', '==', farmerId),
+        where('payoutStatus', '==', 'UNPAID')
+      )
+    );
 
     const records = snapshot.docs.map((doc) => doc.data());
     const grossTotal = records.reduce((sum, r) => sum + r.totalAmount, 0);
@@ -70,10 +73,10 @@ class ProduceService {
    * @param {string} payoutId - The payout that settled these records
    */
   async markProduceAsSettled(recordIds, payoutId) {
-    const batch = db.batch();
+    const batch = writeBatch(db);
 
     for (const recordId of recordIds) {
-      const ref = db.collection(PRODUCE_COLLECTION).doc(recordId);
+      const ref = doc(db, PRODUCE_COLLECTION, recordId);
       batch.update(ref, {
         payoutStatus: 'SETTLED',
         payoutId,
@@ -87,10 +90,9 @@ class ProduceService {
    * Get aggregate produce statistics for a farmer (used by Credit Engine).
    */
   async getProduceStats(farmerId) {
-    const snapshot = await db
-      .collection(PRODUCE_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .get();
+    const snapshot = await getDocs(
+      query(collection(db, PRODUCE_COLLECTION), where('farmerId', '==', farmerId))
+    );
 
     const records = snapshot.docs.map((doc) => doc.data());
 

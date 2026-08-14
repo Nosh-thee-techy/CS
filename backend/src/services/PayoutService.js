@@ -1,3 +1,4 @@
+import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 import env from '../config/env.js';
@@ -94,7 +95,7 @@ class PayoutService {
     //    - Save payout record
     //    - Mark produce as settled
     //    - Reduce loan balances
-    await db.collection(PAYOUTS_COLLECTION).doc(payoutId).set(payout);
+    await setDoc(doc(db, PAYOUTS_COLLECTION, payoutId), payout);
     await ProduceService.markProduceAsSettled(
       unpaidRecords.map((r) => r.recordId),
       payoutId
@@ -174,24 +175,26 @@ class PayoutService {
    * Get payout by ID.
    */
   async getPayoutById(payoutId) {
-    const doc = await db.collection(PAYOUTS_COLLECTION).doc(payoutId).get();
-    if (!doc.exists) {
+    const docSnap = await getDoc(doc(db, PAYOUTS_COLLECTION, payoutId));
+    if (!docSnap.exists()) {
       const err = new Error('Payout not found.');
       err.statusCode = 404;
       throw err;
     }
-    return doc.data();
+    return docSnap.data();
   }
 
   /**
    * Get payouts for a farmer.
    */
   async getPayoutsByFarmer(farmerId) {
-    const snapshot = await db
-      .collection(PAYOUTS_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, PAYOUTS_COLLECTION),
+        where('farmerId', '==', farmerId),
+        orderBy('createdAt', 'desc')
+      )
+    );
     return snapshot.docs.map((doc) => doc.data());
   }
 
@@ -210,11 +213,13 @@ class PayoutService {
     }
 
     // Find payout by LOOP transaction ref
-    const snapshot = await db
-      .collection(PAYOUTS_COLLECTION)
-      .where('loopTransactionRef', '==', parsed.transactionRef)
-      .limit(1)
-      .get();
+    const snapshot = await getDocs(
+      query(
+        collection(db, PAYOUTS_COLLECTION),
+        where('loopTransactionRef', '==', parsed.transactionRef),
+        limit(1)
+      )
+    );
 
     if (snapshot.empty) {
       console.warn(`⚠️ No payout found for LOOP ref: ${parsed.transactionRef}`);
@@ -224,7 +229,7 @@ class PayoutService {
     const payoutDoc = snapshot.docs[0];
     const newStatus = parsed.status === 'COMPLETED' ? 'COMPLETED' : 'FAILED';
 
-    await payoutDoc.ref.update({ status: newStatus });
+    await updateDoc(doc(db, PAYOUTS_COLLECTION, payoutDoc.data().payoutId), { status: newStatus });
 
     return {
       acknowledged: true,

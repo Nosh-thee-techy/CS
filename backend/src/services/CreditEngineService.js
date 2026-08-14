@@ -1,3 +1,4 @@
+import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
 import { db } from '../config/firebase.js';
 import ProduceService from './ProduceService.js';
 
@@ -50,7 +51,7 @@ class CreditEngineService {
       lastCalculatedAt: new Date().toISOString(),
     };
 
-    await db.collection(CREDIT_PROFILES_COLLECTION).doc(farmerId).set(profile, { merge: true });
+    await setDoc(doc(db, CREDIT_PROFILES_COLLECTION, farmerId), profile, { merge: true });
 
     return profile;
   }
@@ -59,12 +60,12 @@ class CreditEngineService {
    * Retrieve a stored credit profile without recalculating.
    */
   async getCreditProfile(farmerId) {
-    const doc = await db.collection(CREDIT_PROFILES_COLLECTION).doc(farmerId).get();
-    if (!doc.exists) {
+    const docSnap = await getDoc(doc(db, CREDIT_PROFILES_COLLECTION, farmerId));
+    if (!docSnap.exists()) {
       // Auto-calculate if none exists
       return this.calculateCreditScore(farmerId);
     }
-    return doc.data();
+    return docSnap.data();
   }
 
   // ─── Internal helpers ──────────────────────────────────────────────
@@ -73,10 +74,9 @@ class CreditEngineService {
    * Get loan repayment statistics for a farmer.
    */
   async _getLoanRepaymentStats(farmerId) {
-    const snapshot = await db
-      .collection(LOANS_COLLECTION)
-      .where('farmerId', '==', farmerId)
-      .get();
+    const snapshot = await getDocs(
+      query(collection(db, LOANS_COLLECTION), where('farmerId', '==', farmerId))
+    );
 
     const loans = snapshot.docs.map((doc) => doc.data());
 
