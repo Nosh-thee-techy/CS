@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Smartphone, Building2, Zap, ShieldCheck } from 'lucide-react';
+import { LimaNaLoopLogo } from '../components/ui/LimaNaLoopLogo';
 
 const portals = [
   {
@@ -75,31 +76,14 @@ export default function Login() {
 
         {/* Brand Header Badge */}
         <div>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
-            padding: '6px 16px', borderRadius: 99,
-            background: '#FFFFFF', border: '1px solid var(--border-light)',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            marginBottom: 36,
-          }}>
-            <div style={{
-              width: 26, height: 26, borderRadius: '50%',
-              background: 'var(--loop-orange)', color: '#FFFFFF',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 900, fontSize: '0.7rem', letterSpacing: '-0.02em',
-              boxShadow: '0 2px 8px rgba(255,95,0,0.3)',
-            }}>
-              LL
-            </div>
-            <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--loop-dark)', letterSpacing: '0.04em' }}>
-              POWERED BY LOOP & SAFARICOM DARAJA 3.0 API
-            </span>
+          <div style={{ marginBottom: 32 }}>
+            <LimaNaLoopLogo size={48} showText={true} textColor="var(--loop-dark)" />
           </div>
 
           {/* Hero Main Headline */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--loop-orange)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 4 }}>
-              NEW AGE SUPPLY CHAIN FINANCING
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--loop-orange)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
+              Aesthetic Agricultural Credit & Supply Chain Financing
             </div>
             <h1 style={{
               fontSize: '3.6rem',

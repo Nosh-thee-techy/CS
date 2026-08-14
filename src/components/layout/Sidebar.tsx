@@ -5,6 +5,7 @@ import {
   BarChart3, Settings, LogOut, Smartphone, Building2, Zap,
   Plus, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { LimaNaLoopLogo } from '../ui/LimaNaLoopLogo';
 
 type Portal = 'farmer' | 'coop' | 'loop';
 
@@ -84,31 +85,11 @@ export default function Sidebar({ portal }: SidebarProps) {
     }}>
       {/* Brand Header */}
       <div style={{
-        padding: collapsed ? '22px 0' : '22px 20px',
+        padding: collapsed ? '18px 0' : '20px 20px',
         display: 'flex', alignItems: 'center', gap: 12,
         justifyContent: collapsed ? 'center' : 'flex-start',
       }}>
-        <div style={{
-          width: 36, height: 36,
-          background: 'var(--loop-orange)',
-          borderRadius: 10,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 900, fontSize: '0.95rem', color: '#FFFFFF',
-          letterSpacing: '-0.04em', flexShrink: 0,
-          boxShadow: 'var(--shadow-orange)',
-        }}>
-          LL
-        </div>
-        {!collapsed && (
-          <div>
-            <div style={{ fontWeight: 900, fontSize: '0.95rem', color: '#FFFFFF', letterSpacing: '-0.02em', lineHeight: 1 }}>
-              {cfg.label}
-            </div>
-            <div style={{ fontSize: '0.65rem', color: 'var(--loop-orange)', marginTop: 3, fontWeight: 800, letterSpacing: '0.05em' }}>
-              {cfg.sublabel.toUpperCase()}
-            </div>
-          </div>
-        )}
+        <LimaNaLoopLogo size={collapsed ? 34 : 36} showText={!collapsed} textColor="#FFFFFF" />
       </div>
 
       {/* Portal Switcher Buttons */}
