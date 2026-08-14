@@ -5,10 +5,14 @@ import FarmerController from '../controllers/FarmerController.js';
 
 const router = Router();
 
-/**
- * POST /api/farmers
- * Register a new farmer.
- */
+router.get('/', (req, res, next) => FarmerController.listAll(req, res, next));
+
+router.get(
+  '/cooperative/:cooperativeId',
+  [param('cooperativeId').notEmpty().withMessage('Cooperative ID is required.'), validate],
+  (req, res, next) => FarmerController.listByCooperative(req, res, next)
+);
+
 router.post(
   '/',
   [
@@ -21,30 +25,12 @@ router.post(
   (req, res, next) => FarmerController.register(req, res, next)
 );
 
-/**
- * GET /api/farmers/:farmerId
- * Get farmer by ID.
- */
 router.get(
   '/:farmerId',
   [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],
   (req, res, next) => FarmerController.getById(req, res, next)
 );
 
-/**
- * GET /api/farmers/cooperative/:cooperativeId
- * List all farmers for a cooperative.
- */
-router.get(
-  '/cooperative/:cooperativeId',
-  [param('cooperativeId').notEmpty().withMessage('Cooperative ID is required.'), validate],
-  (req, res, next) => FarmerController.listByCooperative(req, res, next)
-);
-
-/**
- * PATCH /api/farmers/:farmerId
- * Update farmer profile.
- */
 router.patch(
   '/:farmerId',
   [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],

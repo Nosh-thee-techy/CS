@@ -8,15 +8,26 @@ Full scope, architecture, and API contracts: [`PROJECT.md`](./PROJECT.md).
 
 ## Quick start
 
+From the repo root:
+
 ```bash
-npm install
-npm run dev
+npm install --prefix backend
+npm run dev --prefix backend
 ```
 
-- Frontend: http://localhost:5173
-- Backend:  http://localhost:3001/health
+Then in `my-readiness/frontend`:
 
-Leave `CORE_PLATFORM_API_URL` empty to use the mock core-platform client.
+```bash
+npm install
+npx vite
+```
+
+- Frontend: http://localhost:5173 (proxies `/api` to port 3000)
+- API:      http://localhost:3000/health
+- Lookup:   http://localhost:3000/api/readiness/KTDA-43456789
+
+Registered farmers are served from Firestore (national ID, phone, or member
+number). Leave Firebase unset to use the demo lookups below.
 
 ## Demo lookups
 
@@ -26,17 +37,9 @@ Leave `CORE_PLATFORM_API_URL` empty to use the mock core-platform client.
 | `0712345678` | Credit ready (82) |
 | `12345678` | Building trust (41) |
 
-Any other member number, phone, or national ID returns a generated profile.
-
-## Scripts
-
-| Command | What it does |
-|---|---|
-| `npm run dev` | Backend + frontend together |
-| `npm run dev:backend` | Express API only |
-| `npm run dev:frontend` | Vite PWA only |
-| `npm run build` | Production frontend build |
+Unknown lookups return 404.
 
 ## Environment
 
-Copy `backend/.env.example` to `backend/.env`. See `PROJECT.md` section 10.
+Copy `backend/.env.example` to `backend/.env` in the repo root. Featherless
+is optional. See `PROJECT.md`.

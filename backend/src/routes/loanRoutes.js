@@ -14,23 +14,6 @@ router.post('/loop-repayment-callback', (req, res, next) =>
 );
 
 /**
- * POST /api/loans/:loanId/repayment-prompt
- * Prompt a farmer to repay a specific loan using LOOP Prompt.
- */
-router.post(
-  '/:loanId/repayment-prompt',
-  [
-    param('loanId').notEmpty().withMessage('Loan ID is required.'),
-    body('amount').optional().isFloat({ gt: 0 }).withMessage('Amount must be a positive number.'),
-    body('mobileNo').optional().notEmpty().withMessage('Mobile number cannot be empty.'),
-    body('merchantTill').optional().notEmpty().withMessage('Merchant till cannot be empty.'),
-    body('callBackUrl').optional().isURL({ require_tld: false }).withMessage('Callback URL must be a valid URL.'),
-    validate,
-  ],
-  (req, res, next) => LoanController.promptRepayment(req, res, next)
-);
-
-/**
  * POST /api/loans
  * Farmer requests a loan.
  */
@@ -45,6 +28,53 @@ router.post(
     validate,
   ],
   (req, res, next) => LoanController.requestLoan(req, res, next)
+);
+
+/**
+ * GET /api/loans/farmer/:farmerId/outstanding
+ * Get outstanding loan balance for a farmer.
+ */
+router.get(
+  '/farmer/:farmerId/outstanding',
+  [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],
+  (req, res, next) => LoanController.getOutstanding(req, res, next)
+);
+
+/**
+ * GET /api/loans/farmer/:farmerId
+ * Get all loans for a farmer.
+ */
+router.get(
+  '/farmer/:farmerId',
+  [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],
+  (req, res, next) => LoanController.getByFarmer(req, res, next)
+);
+
+/**
+ * GET /api/loans/cooperative/:cooperativeId
+ * Get all loans for a cooperative.
+ */
+router.get(
+  '/cooperative/:cooperativeId',
+  [param('cooperativeId').notEmpty().withMessage('Cooperative ID is required.'), validate],
+  (req, res, next) => LoanController.getByCooperative(req, res, next)
+);
+
+/**
+ * POST /api/loans/:loanId/repayment-prompt
+ * Prompt a farmer to repay a specific loan using LOOP Prompt.
+ */
+router.post(
+  '/:loanId/repayment-prompt',
+  [
+    param('loanId').notEmpty().withMessage('Loan ID is required.'),
+    body('amount').optional().isFloat({ gt: 0 }).withMessage('Amount must be a positive number.'),
+    body('mobileNo').optional().notEmpty().withMessage('Mobile number cannot be empty.'),
+    body('merchantTill').optional().notEmpty().withMessage('Merchant till cannot be empty.'),
+    body('callBackUrl').optional().isURL({ require_tld: false }).withMessage('Callback URL must be a valid URL.'),
+    validate,
+  ],
+  (req, res, next) => LoanController.promptRepayment(req, res, next)
 );
 
 /**
@@ -72,36 +102,6 @@ router.get(
   '/:loanId',
   [param('loanId').notEmpty().withMessage('Loan ID is required.'), validate],
   (req, res, next) => LoanController.getById(req, res, next)
-);
-
-/**
- * GET /api/loans/farmer/:farmerId
- * Get all loans for a farmer.
- */
-router.get(
-  '/farmer/:farmerId',
-  [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],
-  (req, res, next) => LoanController.getByFarmer(req, res, next)
-);
-
-/**
- * GET /api/loans/cooperative/:cooperativeId
- * Get all loans for a cooperative.
- */
-router.get(
-  '/cooperative/:cooperativeId',
-  [param('cooperativeId').notEmpty().withMessage('Cooperative ID is required.'), validate],
-  (req, res, next) => LoanController.getByCooperative(req, res, next)
-);
-
-/**
- * GET /api/loans/farmer/:farmerId/outstanding
- * Get outstanding loan balance for a farmer.
- */
-router.get(
-  '/farmer/:farmerId/outstanding',
-  [param('farmerId').notEmpty().withMessage('Farmer ID is required.'), validate],
-  (req, res, next) => LoanController.getOutstanding(req, res, next)
 );
 
 export default router;

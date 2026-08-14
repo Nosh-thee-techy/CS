@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { farmers, gradeRates, formatKES } from '../../lib/mockData';
+import { gradeRates, formatKES } from '../../lib/mockData';
 import type { Grade } from '../../lib/mockData';
 import { Send, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { usePlatform } from '../../lib/PlatformContext';
+import { api } from '../../lib/api';
 
 export default function LogDelivery() {
+  const { farmers, refresh } = usePlatform();
   const [farmerId, setFarmerId] = useState('F-001');
   const [weightKg, setWeightKg] = useState(42);
   const [grade, setGrade] = useState<Grade>('A');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const farmer = farmers.find(f => f.id === farmerId);
   const rate = gradeRates[grade];
@@ -17,9 +21,22 @@ export default function LogDelivery() {
   const factoryCharge = Math.round(gross * 0.067);
   const net = gross - saccoLevy - factoryCharge;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setError('');
+    try {
+      await api.recordProduce({
+        farmerId,
+        cooperativeId: farmer?.cooperativeId || 'C001',
+        cropType: farmer?.cropType || 'tea',
+        quantityKg: weightKg,
+        ratePerKg: rate,
+      });
+      await refresh();
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not record delivery');
+    }
   };
 
   if (submitted) {
@@ -137,6 +154,7 @@ export default function LogDelivery() {
             </div>
           </div>
 
+          {error && <p style={{ color: 'var(--rose-red)', margin: 0 }}>{error}</p>}
           <button type="submit" className="btn btn-orange btn-lg" style={{ marginTop: 8 }}>
             <Send size={16} /> Record Delivery & Push SMS
           </button>

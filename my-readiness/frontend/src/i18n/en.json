@@ -5,22 +5,40 @@
     "kali": "Kali"
   },
   "splash": {
-    "tap": "Tap to continue"
+    "tap": "Tap to continue",
+    "line": "Check your credit readiness",
+    "go": "Go"
   },
   "lookup": {
     "kicker": "KaLI Coop",
-    "headline": "Your credit at a glance",
+    "headline": "Check your credit readiness",
     "sub": "No login needed. Enter your member number, phone, or national ID.",
     "placeholder": "Member no. / phone / ID",
+    "fieldLabel": "Member number, phone, or ID",
     "button": "Check my score",
     "checking": "Looking you up…",
     "hint": "Try KTDA-43456789, 0712345678, or 12345678",
-    "language": "Language"
+    "language": "Language",
+    "languageAsk": "Kali will speak this language",
+    "features": {
+      "score": {
+        "title": "See your score",
+        "body": "A number from 0–100, plus why it is that — in plain language."
+      },
+      "loan": {
+        "title": "Apply for a loan",
+        "body": "See what you qualify for, choose an amount, then confirm by SMS."
+      },
+      "improve": {
+        "title": "Know what to do next",
+        "body": "Short steps that raise your score. Reporting does not change it today."
+      }
+    }
   },
   "nav": {
     "score": "Score",
-    "actions": "Actions",
-    "advisory": "Advisory"
+    "loan": "Loan",
+    "improve": "Improve"
   },
   "score": {
     "yourScore": "Your score",
@@ -28,37 +46,160 @@
     "strengths": "What's helping",
     "gaps": "What's holding you back",
     "changeFarmer": "Look up someone else",
-    "offline": "Showing the last score we saved on this phone."
+    "offline": "Showing saved data, may be outdated.",
+    "updated": "Last updated",
+    "climate": "Climate advisory",
+    "climateStay": "Stick to this for your zone this season"
   },
   "voice": {
     "play": "Play Kali greeting",
     "playing": "Kali is speaking…",
     "replay": "Play again"
   },
-  "actions": {
-    "title": "Your next steps",
-    "selfReportNote": "Ticking a box reports progress for your field officer to verify. It does not change your score today.",
+  "kali": {
+    "title": "Kali",
+    "open": "Talk to Kali",
+    "close": "Close",
+    "ready": "Ask with your voice or type",
+    "listening": "Listening…",
+    "speaking": "Kali is speaking…",
+    "placeholder": "Type a message",
+    "send": "Send",
+    "talk": "Speak",
+    "stop": "Stop listening",
+    "noMic": "This browser can't listen. Type instead.",
+    "micFail": "Couldn't hear that. Try again, or type."
+  },
+  "improve": {
+    "title": "Improve your score",
+    "how": "How",
+    "impact": "Impact",
+    "points": "+{{count}} points",
+    "not_started": "Not started",
     "verified": "Verified",
-    "pending": "Waiting for officer",
-    "report": "I have done this",
-    "reported": "Reported — waiting for verification",
+    "recommended": "Recommended this month",
+    "pending": "Pending verification",
+    "markDone": "I have done this",
+    "doThis": "Show I did this",
+    "cancel": "Cancel",
+    "evidenceHelp": "Add a photo or a voice note so an officer can check. This does not change your score today.",
+    "photo": "Take photo",
+    "gallery": "Choose photo",
+    "audioStart": "Record voice note",
+    "audioStop": "Stop recording",
+    "audioAgain": "Record again",
+    "noAudio": "This phone couldn't record. Add a photo instead.",
+    "needEvidence": "Add a photo or a voice note first.",
+    "noteLabel": "Optional note",
+    "notePlaceholder": "A short note for the officer",
+    "sendEvidence": "Send for verification",
+    "sending": "Sending…",
+    "means": "How to show it",
+    "meansPhoto": "Photo",
+    "meansAudio": "Voice note",
+    "photoSent": "Photo sent",
+    "audioSent": "Voice note sent",
     "success": "Reported. An officer will verify. Your score stays the same today.",
-    "error": "Could not send the report. Try again when you have signal."
+    "error": "Could not send the report. Try again when you have signal.",
+    "note": "Reporting a step does not change your score. Points apply only after an officer verifies."
   },
-  "advisory": {
-    "title": "Climate advisory",
-    "zoneHint": "Advice for your farming zone this week.",
-    "disbursement": "Disbursement",
-    "eligible": "You are in the credit-ready band. Ask your officer about disbursement.",
-    "notEligible": "Not yet eligible for disbursement. Follow the action list to get there."
+  "loan": {
+    "title": "Apply for a loan",
+    "paneApply": "Get a loan",
+    "paneRepay": "Pay back",
+    "stepOf": "Step {{n}} of {{total}}",
+    "eligibleAmount": "You qualify for",
+    "eligibleHint": "This limit comes from your score. You can ask for this amount or less.",
+    "youQualify": "You qualify for",
+    "capNote": "You cannot request more than you qualify for.",
+    "want": "How much do you want?",
+    "wantField": "Amount you want",
+    "overCap": "That's more than you qualify for. We set it to KES {{amount}}.",
+    "amount": "Amount",
+    "purpose": "Purpose",
+    "purposeAsk": "What is the money for?",
+    "purposes": {
+      "input_purchase": "Input purchase",
+      "farm_equipment": "Farm equipment",
+      "other": "Other"
+    },
+    "next": "Continue",
+    "back": "Back",
+    "confirmTitle": "Check and send",
+    "confirmAmount": "You are requesting",
+    "guideTitle": "How a KaLI loan works",
+    "guide": {
+      "1": "We show what you qualify for from your current score.",
+      "2": "You choose how much you want — up to that limit.",
+      "3": "You say what the money is for.",
+      "4": "Confirm with an SMS code. Then the co-op reviews the request."
+    },
+    "payFirst": "Pay your current loan first. Then you can apply again.",
+    "lockedBody": "Walk through these steps when your score reaches the next tier. Nothing is submitted until then.",
+    "submit": "Submit application",
+    "submitting": "Submitting…",
+    "lockedTitle": "Not eligible yet",
+    "pendingTitle": "Application received",
+    "pendingBody": "Your application for KES {{amount}} is being reviewed.",
+    "reference": "Reference",
+    "error": "Couldn't submit right now. Try again.",
+    "otpHelp": "We'll text a code to this member's phone before the application is sent.",
+    "otpSend": "Send SMS code",
+    "otpSending": "Sending…",
+    "otpResend": "Send a new code",
+    "otpCode": "SMS code",
+    "otpDemo": "Demo code: {{code}}",
+    "deductionsTitle": "Deductions",
+    "deductionsHelp": "When harvest is paid, part of it can go to your loan. The rest is sent to you.",
+    "harvestGross": "Harvest",
+    "loanDeduction": "Taken for loan",
+    "youReceived": "Paid to you",
+    "deductionTotal": "Total taken for loans: KES {{amount}}",
+    "noDeductions": "No deductions on this harvest yet.",
+    "deductionReasons": {
+      "loan_recovery": "Loan recovery"
+    }
   },
-  "bands": {
-    "credit_ready": "Credit ready",
-    "almost_there": "Almost there",
-    "building_trust": "Building trust"
+  "payments": {
+    "title": "Recent payments",
+    "kinds": {
+      "settlement": "Harvest settlement",
+      "disbursement": "Loan disbursement",
+      "loan_repayment": "Loan repayment"
+    },
+    "status": {
+      "completed": "Sent",
+      "pending": "Pending",
+      "failed": "Failed, retrying"
+    }
+  },
+  "repay": {
+    "title": "Pay back your loan",
+    "outstanding": "Amount owed",
+    "due": "Due this season",
+    "thisPayment": "This payment",
+    "payInstallment": "This installment",
+    "payFull": "Pay in full",
+    "remaining": "KES {{amount}} will still be owed after this payment.",
+    "clears": "This payment clears the loan.",
+    "method": "Payment will be collected by M-Pesa. Status shows as Pending until it is confirmed.",
+    "submit": "Send payment",
+    "sending": "Sending…",
+    "success": "Payment recorded. It shows as Pending until it is confirmed."
+  },
+  "admin": {
+    "title": "Flagged accounts",
+    "sub": "Read-only. Detection runs on the core platform — this list only displays what it flagged.",
+    "error": "Couldn't load flagged accounts.",
+    "reasons": {
+      "duplicate_deliveries": "Duplicate deliveries",
+      "ghost_member": "Ghost member",
+      "sudden_score_change": "Sudden score change"
+    }
   },
   "errors": {
-    "notFound": "We could not find that member. Check the number and try again.",
-    "network": "No connection. If you checked a score before, we will show the saved one."
+    "notFound": "We couldn't find that number. Check it and try again.",
+    "network": "No connection. If you checked a score before, we will show the saved one.",
+    "rateLimited": "Too many lookups. Wait a moment and try again."
   }
 }

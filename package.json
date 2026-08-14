@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:all": "npx concurrently -n api,loop,ready -c yellow,cyan,green \"npm run dev --prefix backend\" \"vite\" \"npm run dev --prefix my-readiness/frontend\"",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"

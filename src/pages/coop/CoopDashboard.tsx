@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Package, Users, Banknote, Zap, ArrowRight } from 'lucide-react';
-import { cooperatives, farmers, deliveries, paymentBatches, formatKES } from '../../lib/mockData';
-
-const myFarmers = farmers.filter(f => f.cooperativeId === 'C001');
-const myBatches = paymentBatches.filter(b => b.cooperativeId === 'C001');
-const recentDeliveries = deliveries.filter(d => d.cooperativeId === 'C001').slice(0, 5);
+import { formatKES } from '../../lib/mockData';
+import { usePlatform } from '../../lib/PlatformContext';
+import { api } from '../../lib/api';
 
 export default function CoopDashboard() {
+  const { farmers, deliveries, paymentBatches, refresh } = usePlatform();
+  const myFarmers = farmers.filter(f => f.cooperativeId === 'C001');
+  const myBatches = paymentBatches.filter(b => b.cooperativeId === 'C001');
+  const recentDeliveries = deliveries.filter(d => d.cooperativeId === 'C001').slice(0, 5);
   const pendingDeliveries = deliveries.filter(d => d.cooperativeId === 'C001' && d.status !== 'paid').length;
   const totalThisMonth = deliveries.filter(d => d.cooperativeId === 'C001' && d.status === 'paid').reduce((a, d) => a + d.netAmount, 0);
 
@@ -135,7 +137,14 @@ export default function CoopDashboard() {
                     {formatKES(b.totalAmount)}
                   </div>
                   {b.status === 'approved' && (
-                    <button className="btn btn-orange btn-sm"><Zap size={13} /> Disburse</button>
+                    <button className="btn btn-orange btn-sm" onClick={async () => {
+                      try {
+                        await api.bulkPayout(b.cooperativeId);
+                        await refresh();
+                      } catch {
+                        /* bulk payout is best-effort from this card */
+                      }
+                    }}><Zap size={13} /> Disburse</button>
                   )}
                 </div>
               </div>

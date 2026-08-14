@@ -1,6 +1,7 @@
 import { collection, doc, getDocs, query, setDoc, where, orderBy, writeBatch } from 'firebase/firestore';
-import { db } from '../config/firebase.js';
+import { db, isFirebaseReady } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
+import demo from '../data/demoStore.js';
 
 const PRODUCE_COLLECTION = 'produce_records';
 
@@ -14,6 +15,9 @@ class ProduceService {
    * @param {object} data - { farmerId, cooperativeId, cropType, quantityKg, ratePerKg, produceDate }
    */
   async recordProduce({ farmerId, cooperativeId, cropType, quantityKg, ratePerKg, produceDate }) {
+    if (!isFirebaseReady()) {
+      return demo.recordProduce({ farmerId, cooperativeId, cropType, quantityKg, ratePerKg, produceDate });
+    }
     const recordId = uuidv4();
     const totalAmount = parseFloat((quantityKg * ratePerKg).toFixed(2));
     const now = new Date().toISOString();
@@ -40,6 +44,9 @@ class ProduceService {
    * Get produce history for a farmer (optionally filtered by cooperative).
    */
   async getProduceHistory(farmerId, cooperativeId = null) {
+    if (!isFirebaseReady()) {
+      return demo.listProduce(farmerId).filter((row) => !cooperativeId || row.cooperativeId === cooperativeId);
+    }
     let firestoreQuery = query(collection(db, PRODUCE_COLLECTION), where('farmerId', '==', farmerId));
     if (cooperativeId) {
       firestoreQuery = query(firestoreQuery, where('cooperativeId', '==', cooperativeId));
@@ -53,6 +60,11 @@ class ProduceService {
    * Returns the list and computed gross total.
    */
   async getUnpaidProduce(farmerId) {
+    if (!isFirebaseReady()) {
+      const records = demo.listProduce(farmerId).filter((row) => row.payoutStatus === 'UNPAID');
+      const grossTotal = records.reduce((sum, row) => sum + row.totalAmount, 0);
+      return { records, grossTotal: parseFloat(grossTotal.toFixed(2)) };
+    }
     const snapshot = await getDocs(
       query(
         collection(db, PRODUCE_COLLECTION),
@@ -73,6 +85,10 @@ class ProduceService {
    * @param {string} payoutId - The payout that settled these records
    */
   async markProduceAsSettled(recordIds, payoutId) {
+    if (!isFirebaseReady()) {
+      demo.markProduceSettled(recordIds, payoutId);
+      return;
+    }
     const batch = writeBatch(db);
 
     for (const recordId of recordIds) {
@@ -90,6 +106,20 @@ class ProduceService {
    * Get aggregate produce statistics for a farmer (used by Credit Engine).
    */
   async getProduceStats(farmerId) {
+    if (!isFirebaseReady()) {
+      const records = demo.listProduce(farmerId);
+      const totalQuantityKg = records.reduce((sum, row) => sum + row.quantityKg, 0);
+      const totalEarnings = records.reduce((sum, row) => sum + row.totalAmount, 0);
+      return {
+        totalDeliveries: records.length,
+        totalQuantityKg,
+        totalEarnings,
+        averageQuantityPerDelivery: records.length ? totalQuantityKg / records.length : 0,
+        cropTypes: [...new Set(records.map((row) => row.cropType))],
+        earliestDelivery: records.at(-1)?.produceDate || null,
+        latestDelivery: records[0]?.produceDate || null,
+      };
+    }
     const snapshot = await getDocs(
       query(collection(db, PRODUCE_COLLECTION), where('farmerId', '==', farmerId))
     );

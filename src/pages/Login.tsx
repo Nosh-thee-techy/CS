@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Smartphone, Building2, Zap, ShieldCheck } from 'lucide-react';
+import { READINESS_URL } from '../lib/PlatformContext';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import logoImg from '../assets/lima-na-loop-logo.png';
 
 const portals = [
-  {
-    id: 'farmer',
-    icon: '🌿',
-    title: 'Farmer Portal',
-    subtitle: 'Smallholder Wallet',
-    desc: 'Itemised payout statements, delivery confirmation SMS & agricultural credit score.',
-    route: '/app/farmer',
-    badge: 'LOOP Connected',
-  },
   {
     id: 'coop',
     icon: '🏭',
@@ -137,6 +129,21 @@ export default function Login() {
           <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--loop-dark)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>
             Select Portal to Access Dashboard:
           </div>
+
+          <a
+            href={READINESS_URL}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', borderRadius: 14, textDecoration: 'none',
+              background: 'var(--loop-orange-soft)', border: '1px solid rgba(255,95,0,0.25)',
+              color: 'var(--loop-dark)', marginBottom: 4,
+            }}
+          >
+            <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>
+              Farmers use <span style={{ color: 'var(--loop-orange)' }}>My Readiness</span>
+            </span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--loop-orange)' }}>Open →</span>
+          </a>
 
           {portals.map(p => {
             const isSelected = selectedId === p.id;

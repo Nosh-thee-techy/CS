@@ -35,13 +35,11 @@ router.post(
 );
 
 /**
- * GET /api/payouts/:payoutId
- * Get payout by ID.
+ * POST /api/payouts/loop-callback
+ * Webhook endpoint for LOOP payment status updates.
  */
-router.get(
-  '/:payoutId',
-  [param('payoutId').notEmpty().withMessage('Payout ID is required.'), validate],
-  (req, res, next) => PayoutController.getById(req, res, next)
+router.post('/loop-callback', (req, res, next) =>
+  PayoutController.handleLoopCallback(req, res, next)
 );
 
 /**
@@ -55,11 +53,13 @@ router.get(
 );
 
 /**
- * POST /api/payouts/loop-callback
- * Webhook endpoint for LOOP payment status updates.
+ * GET /api/payouts/:payoutId
+ * Get payout by ID.
  */
-router.post('/loop-callback', (req, res, next) =>
-  PayoutController.handleLoopCallback(req, res, next)
+router.get(
+  '/:payoutId',
+  [param('payoutId').notEmpty().withMessage('Payout ID is required.'), validate],
+  (req, res, next) => PayoutController.getById(req, res, next)
 );
 
 export default router;

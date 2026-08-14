@@ -1,11 +1,12 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, setDoc, updateDoc, where } from 'firebase/firestore';
-import { db } from '../config/firebase.js';
+import { db, isFirebaseReady } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 import env from '../config/env.js';
 import ProduceService from './ProduceService.js';
 import LoanService from './LoanService.js';
 import FarmerService from './FarmerService.js';
 import LoopAdapter from './LoopAdapter.js';
+import demo from '../data/demoStore.js';
 
 const PAYOUTS_COLLECTION = 'payouts';
 
@@ -91,11 +92,12 @@ class PayoutService {
       payout.status = 'COMPLETED';
     }
 
-    // 7. Atomic Firestore updates
-    //    - Save payout record
-    //    - Mark produce as settled
-    //    - Reduce loan balances
-    await setDoc(doc(db, PAYOUTS_COLLECTION, payoutId), payout);
+    // 7. Persist payout + settle produce + reduce loans
+    if (isFirebaseReady()) {
+      await setDoc(doc(db, PAYOUTS_COLLECTION, payoutId), payout);
+    } else {
+      demo.addPayout(payout);
+    }
     await ProduceService.markProduceAsSettled(
       unpaidRecords.map((r) => r.recordId),
       payoutId
@@ -175,6 +177,15 @@ class PayoutService {
    * Get payout by ID.
    */
   async getPayoutById(payoutId) {
+    if (!isFirebaseReady()) {
+      const payout = demo.getPayout(payoutId);
+      if (!payout) {
+        const err = new Error('Payout not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      return payout;
+    }
     const docSnap = await getDoc(doc(db, PAYOUTS_COLLECTION, payoutId));
     if (!docSnap.exists()) {
       const err = new Error('Payout not found.');
@@ -188,6 +199,9 @@ class PayoutService {
    * Get payouts for a farmer.
    */
   async getPayoutsByFarmer(farmerId) {
+    if (!isFirebaseReady()) {
+      return demo.listPayouts(farmerId);
+    }
     const snapshot = await getDocs(
       query(
         collection(db, PAYOUTS_COLLECTION),
@@ -210,6 +224,21 @@ class PayoutService {
       const err = new Error('Missing transaction reference in webhook payload.');
       err.statusCode = 400;
       throw err;
+    }
+
+    if (!isFirebaseReady()) {
+      const newStatus = parsed.status === 'COMPLETED' ? 'COMPLETED' : 'FAILED';
+      const payout = demo.updatePayoutByLoopRef(parsed.transactionRef, newStatus);
+      if (!payout) {
+        console.warn(`⚠️ No payout found for LOOP ref: ${parsed.transactionRef}`);
+        return { acknowledged: true, found: false };
+      }
+      return {
+        acknowledged: true,
+        found: true,
+        payoutId: payout.payoutId,
+        newStatus,
+      };
     }
 
     // Find payout by LOOP transaction ref

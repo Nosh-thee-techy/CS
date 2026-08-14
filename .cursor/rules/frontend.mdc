@@ -11,8 +11,10 @@ React (Vite) + Tailwind + react-i18next. App-like mobile web, not a marketing si
 - Screens in `my-readiness/frontend/src/screens/`; shared UI in `my-readiness/frontend/src/components/`
 - All user-facing strings via i18n keys (`en` + `sw`). No hardcoded English.
 - Persist locale in `localStorage`. Call backend with `?lang=`
-- Bottom nav: Score / Actions / Advisory. Lookup has no nav.
-- Strengths & gaps live on the Score tab
+- Bottom nav: Score / Loan / Improve. Lookup has no nav.
+- Score tab: number + band, climate card, why, strengths, gaps (2 max). No nested phone mockup.
+- Loan tab: server-calculated amount only; locked explainer if not eligible
+- Improve tab: action cards with how / impact / points; self-report never changes the score
 - Cache last-viewed profile for flaky networks; show it if the live call fails
 - Kali greeting: play `voiceGreetingUrl` when present; else speak `voiceGreetingText`
 - Self-report checkboxes call `POST /api/readiness/:lookup/actions/:id/complete` only

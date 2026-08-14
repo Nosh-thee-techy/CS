@@ -14,6 +14,15 @@ class FarmerController {
     }
   }
 
+  async listAll(req, res, next) {
+    try {
+      const farmers = await FarmerService.listAll();
+      res.json({ success: true, data: farmers, count: farmers.length });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async getById(req, res, next) {
     try {
       const farmer = await FarmerService.getFarmerById(req.params.farmerId);

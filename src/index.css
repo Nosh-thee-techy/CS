@@ -169,6 +169,111 @@ p { color: var(--text-secondary); font-size: 0.875rem; }
 .btn-sm { padding: 7px 14px; font-size: 0.78rem; }
 .btn-lg { padding: 13px 26px; font-size: 0.95rem; }
 
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+}
+.btn-ghost:hover {
+  background: var(--bg-raised);
+  color: var(--text-main);
+}
+
+.page-header { margin-bottom: 22px; }
+.tabular { font-family: 'DM Mono', monospace; font-variant-numeric: tabular-nums; }
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.live-badge.on { background: var(--emerald-soft); color: #065F46; }
+.live-badge.off { background: var(--bg-raised); color: var(--text-muted); }
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  background: #FFFFFF;
+  color: var(--text-secondary);
+  font-family: inherit;
+  transition: var(--transition);
+}
+.filter-pill.active {
+  background: var(--loop-dark);
+  color: #FFFFFF;
+  border-color: var(--loop-dark);
+}
+
+.phone-shell {
+  width: 280px;
+  background: #1A1F26;
+  border-radius: 32px;
+  padding: 18px 14px 22px;
+  box-shadow: 0 18px 50px rgba(20, 26, 33, 0.35);
+  color: #FFFFFF;
+}
+.phone-screen {
+  background: #0E1318;
+  border-radius: 12px;
+  min-height: 220px;
+  padding: 14px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  color: #D1FAE5;
+}
+.phone-key {
+  height: 42px;
+  border: none;
+  border-radius: 10px;
+  background: #2B3542;
+  color: #FFFFFF;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+}
+.phone-key:hover { background: var(--loop-orange); }
+.phone-softkeys {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+.phone-soft {
+  border: none;
+  background: transparent;
+  color: #FDBA74;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  min-height: 32px;
+}
+.phone-key-call { background: #15803D; }
+.phone-key-call:hover { background: #16A34A; }
+.phone-key-end { background: #B91C1C; }
+.phone-key-end:hover { background: #DC2626; }
+
 /* Inputs */
 .search-input-pill {
   display: flex;

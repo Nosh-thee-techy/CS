@@ -1,6 +1,6 @@
 ---
 description: Backend conventions for the My Readiness BFF
-globs: my-readiness/backend/**/*.js
+globs: backend/**/*.js,my-readiness/backend/**/*.js
 alwaysApply: false
 ---
 
@@ -8,13 +8,12 @@ alwaysApply: false
 
 Thin Express BFF. Consumer of scoring data — never compute a score.
 
-- Routes: `GET /api/readiness/:lookup`, `POST /api/readiness/:lookup/actions/:id/complete`
-- Outbound calls only through `clients/corePlatform.js`
-- Draft core contract (confirm before going live):
-  - `GET /internal/farmer/:lookup/score`
-  - `GET /internal/farmer/:lookup/actions`
-  - `POST /internal/farmer/:lookup/actions/:id/complete`
-  - `GET /internal/zone/:zoneId/advisory`
-- Localize raw keys into the display-ready payload in this service
-- Mock when `CORE_PLATFORM_API_URL` is unset; swap the client, not the route handlers
-- Env: `CORE_PLATFORM_API_URL`, `CORE_PLATFORM_API_KEY`, `DEFAULT_LOCALE`, `PORT`
+- Routes live on the main Agricultural Credit Platform API (`backend/`, port 3000): `GET /api/readiness/:lookup` (10/min/IP), `POST .../actions/:id/complete`, `POST .../loan-application` (OTP required), `POST /api/otp/request`, `GET /api/admin/flagged-accounts`
+- Scoring stays in `CreditEngineService` (300–850). Readiness maps that to the 0–100 farmer display scale — do not invent a second algorithm
+- Outbound shaping through `my-readiness/backend/src/clients/corePlatform.js` (in-process `ReadinessService`, else demo mocks)
+- Localize raw keys into the display-ready payload in `my-readiness/backend/src/lib/localize.js`
+- Dynamic farmer text (why, action how/impact, climate) may pass through Featherless when `FEATHERLESS_API_KEY` is set; static UI stays in i18n files
+- Env: Firebase client SDK (`FIREBASE_API_KEY` + `FIREBASE_PROJECT_ID`, optional Auth email/password), Africa's Talking (`AT_USERNAME`, `AT_API_KEY`, `AT_CALLBACK_SECRET`), `FEATHERLESS_API_KEY`, `FEATHERLESS_MODEL`, `DEFAULT_LOCALE`, `PORT`
+- USSD lives on the core API: `POST /api/ussd` (Africa's Talking callback). Same ReadinessService as the PWA — do not score inside the USSD handler
+- Loan amount is always server-derived from eligibility — never accept amount from the client
+- OTP only wraps loan submit; score/improve stay public

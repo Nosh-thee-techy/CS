@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
-type Portal = 'farmer' | 'coop' | 'loop';
+type Portal = 'coop' | 'loop';
 
 export default function AppLayout({ portal }: { portal: Portal }) {
   return (

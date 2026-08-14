@@ -1,6 +1,7 @@
 import { collection, doc, getDoc, getDocs, query, setDoc, where } from 'firebase/firestore';
-import { db } from '../config/firebase.js';
+import { db, isFirebaseReady } from '../config/firebase.js';
 import ProduceService from './ProduceService.js';
+import demo from '../data/demoStore.js';
 
 const CREDIT_PROFILES_COLLECTION = 'credit_profiles';
 const LOANS_COLLECTION = 'loans';
@@ -18,6 +19,15 @@ class CreditEngineService {
    * @returns {object} Credit profile
    */
   async calculateCreditScore(farmerId) {
+    if (!isFirebaseReady()) {
+      const stored = demo.getCreditProfile(farmerId);
+      if (!stored) {
+        const err = new Error('Farmer not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      return stored;
+    }
     // 1. Aggregate produce data
     const produceStats = await ProduceService.getProduceStats(farmerId);
 
@@ -60,6 +70,15 @@ class CreditEngineService {
    * Retrieve a stored credit profile without recalculating.
    */
   async getCreditProfile(farmerId) {
+    if (!isFirebaseReady()) {
+      const stored = demo.getCreditProfile(farmerId);
+      if (!stored) {
+        const err = new Error('Farmer not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      return stored;
+    }
     const docSnap = await getDoc(doc(db, CREDIT_PROFILES_COLLECTION, farmerId));
     if (!docSnap.exists()) {
       // Auto-calculate if none exists

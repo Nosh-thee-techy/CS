@@ -5,22 +5,40 @@
     "kali": "Kali"
   },
   "splash": {
-    "tap": "Gusa kuendelea"
+    "tap": "Gusa kuendelea",
+    "line": "Angalia utayari wako wa mkopo",
+    "go": "Nenda"
   },
   "lookup": {
     "kicker": "KaLI Coop",
-    "headline": "Alama yako kwa mtazamo",
+    "headline": "Angalia utayari wako wa mkopo",
     "sub": "Hauhitaji kuingia. Weka namba ya mwanachama, simu, au kitambulisho.",
     "placeholder": "Namba ya mwanachama / simu / kitambulisho",
+    "fieldLabel": "Namba ya mwanachama, simu, au kitambulisho",
     "button": "Angalia alama yangu",
     "checking": "Tunakutafuta…",
     "hint": "Jaribu KTDA-43456789, 0712345678, au 12345678",
-    "language": "Lugha"
+    "language": "Lugha",
+    "languageAsk": "Kali atazungumza lugha hii",
+    "features": {
+      "score": {
+        "title": "Angalia alama yako",
+        "body": "Namba kutoka 0–100, na maelezo mafupi kwa nini ni hivyo."
+      },
+      "loan": {
+        "title": "Omba mkopo",
+        "body": "Ona kiasi unachostahili, chagua kiasi, kisha thibitisha kwa SMS."
+      },
+      "improve": {
+        "title": "Jua hatua inayofuata",
+        "body": "Hatua fupi zinazoinua alama. Kuripoti hakubadilishi alama leo."
+      }
+    }
   },
   "nav": {
     "score": "Alama",
-    "actions": "Hatua",
-    "advisory": "Ushauri"
+    "loan": "Mkopo",
+    "improve": "Boresha"
   },
   "score": {
     "yourScore": "Alama yako",
@@ -28,37 +46,160 @@
     "strengths": "Kinachokusaidia",
     "gaps": "Kinachokuzuia",
     "changeFarmer": "Tafuta mwanachama mwingine",
-    "offline": "Tunaonyesha alama ya mwisho iliyohifadhiwa kwenye simu hii."
+    "offline": "Tunaonyesha data iliyohifadhiwa, huenda si ya sasa.",
+    "updated": "Ilisasishwa",
+    "climate": "Ushauri wa hali ya hewa",
+    "climateStay": "Fuata huu kwa eneo lako msimu huu"
   },
   "voice": {
     "play": "Cheza salamu ya Kali",
     "playing": "Kali anazungumza…",
     "replay": "Cheza tena"
   },
-  "actions": {
-    "title": "Hatua zako zijazo",
-    "selfReportNote": "Kutia alama kunaripoti maendeleo kwa afisa wako kuthibitisha. Haibadilishi alama yako leo.",
+  "kali": {
+    "title": "Kali",
+    "open": "Ongea na Kali",
+    "close": "Funga",
+    "ready": "Uliza kwa sauti au andika",
+    "listening": "Ninasikiliza…",
+    "speaking": "Kali anazungumza…",
+    "placeholder": "Andika ujumbe",
+    "send": "Tuma",
+    "talk": "Ongea",
+    "stop": "Acha kusikiliza",
+    "noMic": "Kivinjari hiki hakisikilizi. Andika badala yake.",
+    "micFail": "Sikusikia. Jaribu tena, au andika."
+  },
+  "improve": {
+    "title": "Boresha alama yako",
+    "how": "Jinsi",
+    "impact": "Faida",
+    "points": "+{{count}} alama",
+    "not_started": "Haijaanza",
     "verified": "Imethibitishwa",
-    "pending": "Inasubiri afisa",
-    "report": "Nimefanya hivi",
-    "reported": "Imeripotiwa — inasubiri uthibitisho",
+    "recommended": "Inapendekezwa mwezi huu",
+    "pending": "Inasubiri uthibitisho",
+    "markDone": "Nimefanya hivi",
+    "doThis": "Onyesha nimefanya",
+    "cancel": "Ghairi",
+    "evidenceHelp": "Ongeza picha au sauti ili afisa athibitishe. Hii haibadilishi alama leo.",
+    "photo": "Piga picha",
+    "gallery": "Chagua picha",
+    "audioStart": "Rekodi sauti",
+    "audioStop": "Acha kurekodi",
+    "audioAgain": "Rekodi tena",
+    "noAudio": "Simu hii haikurekodi. Ongeza picha badala yake.",
+    "needEvidence": "Ongeza picha au sauti kwanza.",
+    "noteLabel": "Maelezo ya hiari",
+    "notePlaceholder": "Ujumbe mfupi kwa afisa",
+    "sendEvidence": "Tuma kwa uthibitisho",
+    "sending": "Inatuma…",
+    "means": "Jinsi ya kuonyesha",
+    "meansPhoto": "Picha",
+    "meansAudio": "Sauti",
+    "photoSent": "Picha imetumwa",
+    "audioSent": "Sauti imetumwa",
     "success": "Imeripotiwa. Afisa atathibitisha. Alama yako inabaki ile ile leo.",
-    "error": "Ripoti haikutumwa. Jaribu tena ukiwa na mtandao."
+    "error": "Ripoti haikutumwa. Jaribu tena ukiwa na mtandao.",
+    "note": "Kuripoti hatua hakubadilishi alama. Alama zinaongezwa baada ya afisa kuthibitisha."
   },
-  "advisory": {
-    "title": "Ushauri wa hali ya hewa",
-    "zoneHint": "Ushauri wa eneo lako la kilimo wiki hii.",
-    "disbursement": "Malipo",
-    "eligible": "Uko katika kundi la tayari kwa mkopo. Uliza afisa wako kuhusu malipo.",
-    "notEligible": "Bado hufai kupokea malipo. Fuata orodha ya hatua kufika huko."
+  "loan": {
+    "title": "Omba mkopo",
+    "paneApply": "Pata mkopo",
+    "paneRepay": "Lipa",
+    "stepOf": "Hatua {{n}} kati ya {{total}}",
+    "eligibleAmount": "Unastahili",
+    "eligibleHint": "Kikomo hiki kinatokana na alama yako. Unaweza kuomba hiki au kidogo.",
+    "youQualify": "Unastahili",
+    "capNote": "Huwezi kuomba zaidi ya kiasi unachostahili.",
+    "want": "Unataka kiasi gani?",
+    "wantField": "Kiasi unachotaka",
+    "overCap": "Hicho ni zaidi ya unachostahili. Tumeweka KES {{amount}}.",
+    "amount": "Kiasi",
+    "purpose": "Madhumuni",
+    "purposeAsk": "Pesa hizi ni kwa ajili ya nini?",
+    "purposes": {
+      "input_purchase": "Kununua pembejeo",
+      "farm_equipment": "Vifaa vya shamba",
+      "other": "Nyingine"
+    },
+    "next": "Endelea",
+    "back": "Rudi",
+    "confirmTitle": "Kagua na utume",
+    "confirmAmount": "Unataka",
+    "guideTitle": "Jinsi mkopo wa KaLI unavyofanya kazi",
+    "guide": {
+      "1": "Tunaonyesha kiasi unachostahili kutokana na alama yako ya sasa.",
+      "2": "Unachagua kiasi unachotaka — hadi kikomo hicho.",
+      "3": "Unasema pesa ni kwa ajili ya nini.",
+      "4": "Thibitisha kwa namba ya SMS. Kisha ushirika unaangalia ombi."
+    },
+    "payFirst": "Lipa mkopo wa sasa kwanza. Kisha unaweza kuomba tena.",
+    "lockedBody": "Fuata hatua hizi alama yako ifikiapo kiwango kinachofuata. Hakuna kinachotumwa hadi hapo.",
+    "submit": "Tuma ombi",
+    "submitting": "Inatuma…",
+    "lockedTitle": "Bado hufai",
+    "pendingTitle": "Ombi limepokelewa",
+    "pendingBody": "Ombi lako la KES {{amount}} linaangaliwa.",
+    "reference": "Kumbukumbu",
+    "error": "Haikuweza kutuma sasa. Jaribu tena.",
+    "otpHelp": "Tutakutumia namba kwa SMS kabla ombi halijatoka.",
+    "otpSend": "Tuma namba ya SMS",
+    "otpSending": "Inatuma…",
+    "otpResend": "Tuma namba mpya",
+    "otpCode": "Namba ya SMS",
+    "otpDemo": "Namba ya majaribio: {{code}}",
+    "deductionsTitle": "Makato",
+    "deductionsHelp": "Mavuno yanapolipwa, sehemu inaweza kwenda kwenye mkopo. Salio linatumwa kwako.",
+    "harvestGross": "Mavuno",
+    "loanDeduction": "Iliyotolewa kwa mkopo",
+    "youReceived": "Uliolipwa",
+    "deductionTotal": "Jumla iliyotolewa kwa mikopo: KES {{amount}}",
+    "noDeductions": "Hakuna makato kwenye mavuno haya bado.",
+    "deductionReasons": {
+      "loan_recovery": "Kulipia mkopo"
+    }
   },
-  "bands": {
-    "credit_ready": "Tayari kwa mkopo",
-    "almost_there": "Karibu kufika",
-    "building_trust": "Tunajenga imani"
+  "payments": {
+    "title": "Malipo ya hivi karibuni",
+    "kinds": {
+      "settlement": "Malipo ya mavuno",
+      "disbursement": "Utoaji wa mkopo",
+      "loan_repayment": "Kulipa mkopo"
+    },
+    "status": {
+      "completed": "Imetumwa",
+      "pending": "Inasubiri",
+      "failed": "Imeshindwa, inajaribu tena"
+    }
+  },
+  "repay": {
+    "title": "Lipa mkopo wako",
+    "outstanding": "Kiasi unachodaiwa",
+    "due": "Kinadaiwa msimu huu",
+    "thisPayment": "Malipo haya",
+    "payInstallment": "Awamu hii",
+    "payFull": "Lipa yote",
+    "remaining": "KES {{amount}} itabaki baada ya malipo haya.",
+    "clears": "Malipo haya yataondoa mkopo.",
+    "method": "Malipo yatachukuliwa kwa M-Pesa. Hali itaonekana kama Inasubiri hadi yathibitishwe.",
+    "submit": "Tuma malipo",
+    "sending": "Inatuma…",
+    "success": "Malipo yamewekwa. Yataonekana kama Inasubiri hadi yathibitishwe."
+  },
+  "admin": {
+    "title": "Akaunti zilizo na tahadhari",
+    "sub": "Soma tu. Ugunduzi unafanywa na jukwaa kuu — orodha hii inaonyesha tu kilichoonyeshwa.",
+    "error": "Hatukuweza kupakia akaunti zenye tahadhari.",
+    "reasons": {
+      "duplicate_deliveries": "Mavuno yaliyorudiwa",
+      "ghost_member": "Mwanachama asiyekuwepo",
+      "sudden_score_change": "Mabadiliko ya ghafla ya alama"
+    }
   },
   "errors": {
-    "notFound": "Hatukumpata mwanachama huyo. Kagua namba na ujaribu tena.",
-    "network": "Hakuna mtandao. Ikiwa umeangalia alama kabla, tutaonyesha iliyohifadhiwa."
+    "notFound": "Hatukuipata namba hiyo. Kagua na ujaribu tena.",
+    "network": "Hakuna mtandao. Ikiwa umeangalia alama kabla, tutaonyesha iliyohifadhiwa.",
+    "rateLimited": "Umeangalia mara nyingi. Subiri kidogo ujaribu tena."
   }
 }

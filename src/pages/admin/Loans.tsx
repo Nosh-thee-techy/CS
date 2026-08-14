@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, ChevronRight, ArrowUpRight } from 'lucide-react';
-import { loans, formatKES } from '../../lib/mockData';
+import { formatKES } from '../../lib/mockData';
 import type { LoanStatus } from '../../lib/mockData';
+import { usePlatform } from '../../lib/PlatformContext';
+import { api } from '../../lib/api';
 
 const pipeline: { status: LoanStatus; label: string; color: string }[] = [
   { status: 'applied', label: 'Applied', color: 'var(--text-muted)' },
@@ -19,8 +21,11 @@ const loanStatusColor: Record<LoanStatus, string> = {
 };
 
 export default function Loans() {
+  const { loans, refresh } = usePlatform();
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selected, setSelected] = useState<string | null>(null);
+  const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
 
   const filtered = filterStatus === 'all' ? loans : loans.filter(l => l.status === filterStatus);
   const selectedLoan = loans.find(l => l.id === selected);
@@ -136,10 +141,99 @@ export default function Loans() {
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 4 }}>{formatKES(selectedLoan.repaidAmount)} / {formatKES(selectedLoan.amount)}</div>
               </div>
             )}
+            {selectedLoan.status === 'applied' && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                <button
+                  className="btn btn-gold"
+                  style={{ flex: 1, justifyContent: 'center' }}
+                  disabled={Boolean(busy)}
+                  onClick={async () => {
+                    setBusy('approve');
+                    setNotice('');
+                    try {
+                      await api.decideLoan(selectedLoan.id, 'APPROVE', selectedLoan.amount);
+                      await refresh();
+                      setNotice('Loan approved and disbursed via LOOP.');
+                    } catch (err) {
+                      setNotice(err instanceof Error ? err.message : 'Approve failed');
+                    } finally {
+                      setBusy('');
+                    }
+                  }}
+                >
+                  <Zap size={14} /> {busy === 'approve' ? 'Approving…' : 'Approve'}
+                </button>
+                <button
+                  className="btn btn-outline"
+                  disabled={Boolean(busy)}
+                  onClick={async () => {
+                    setBusy('reject');
+                    setNotice('');
+                    try {
+                      await api.decideLoan(selectedLoan.id, 'REJECT');
+                      await refresh();
+                      setNotice('Loan rejected.');
+                    } catch (err) {
+                      setNotice(err instanceof Error ? err.message : 'Reject failed');
+                    } finally {
+                      setBusy('');
+                    }
+                  }}
+                >
+                  {busy === 'reject' ? 'Rejecting…' : 'Reject'}
+                </button>
+              </div>
+            )}
             {selectedLoan.status === 'approved' && (
-              <button className="btn btn-gold" style={{ width: '100%', justifyContent: 'center', marginTop: 14 }}>
-                <Zap size={14} /> Disburse via Loop
+              <button
+                className="btn btn-gold"
+                style={{ width: '100%', justifyContent: 'center', marginTop: 14 }}
+                disabled={Boolean(busy)}
+                onClick={async () => {
+                  setBusy('disburse');
+                  setNotice('');
+                  try {
+                    await api.decideLoan(selectedLoan.id, 'APPROVE', selectedLoan.amount);
+                    await refresh();
+                    setNotice('Disbursed via LOOP.');
+                  } catch (err) {
+                    setNotice(err instanceof Error ? err.message : 'Disburse failed');
+                  } finally {
+                    setBusy('');
+                  }
+                }}
+              >
+                <Zap size={14} /> {busy === 'disburse' ? 'Disbursing…' : 'Disburse via Loop'}
               </button>
+            )}
+            {selectedLoan.status === 'repaying' && (
+              <button
+                className="btn btn-orange"
+                style={{ width: '100%', justifyContent: 'center', marginTop: 14 }}
+                disabled={Boolean(busy)}
+                onClick={async () => {
+                  setBusy('repay');
+                  setNotice('');
+                  try {
+                    const remaining = Math.max(0, selectedLoan.amount - selectedLoan.repaidAmount);
+                    await api.promptRepayment(selectedLoan.id, {
+                      amount: remaining || selectedLoan.amount,
+                      callBackUrl: 'https://cs-fork.onrender.com/api/loans/loop-repayment-callback',
+                      reason: 'Loan repayment prompt',
+                    });
+                    setNotice('Repayment prompt sent.');
+                  } catch (err) {
+                    setNotice(err instanceof Error ? err.message : 'Repayment prompt failed');
+                  } finally {
+                    setBusy('');
+                  }
+                }}
+              >
+                {busy === 'repay' ? 'Sending…' : 'Send repayment prompt'}
+              </button>
+            )}
+            {notice && (
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, marginTop: 10, color: 'var(--emerald-green)' }}>{notice}</div>
             )}
           </div>
         )}

@@ -1,311 +1,351 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  farmers, cooperatives, paymentBatches, loans, kpis,
-  productionComparison, growthActivity, formatKES
-} from '../../lib/mockData';
-import {
-  Zap, ArrowUpRight, Play, Sun, Wind, Droplets, Sliders
-} from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, BarChart, Bar,
 } from 'recharts';
+import { ArrowRight, ClipboardPlus, CloudRain, TrendingUp, Users } from 'lucide-react';
+import { usePlatform } from '../../lib/PlatformContext';
+import { formatKES, initials } from '../../lib/mockData';
+import {
+  formatRelative, weeklyTrend, STATUS_META, SEGMENT_META,
+} from '../../lib/officerDesk';
+import type { ApplicationStatus, DemographicSegment } from '../../lib/officerDesk';
 
-const CustomBarTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{
-      background: 'var(--loop-dark)', color: '#FFFFFF', padding: '8px 12px',
-      borderRadius: 10, boxShadow: '0 4px 14px rgba(0,0,0,0.2)', fontSize: '0.78rem',
-      fontFamily: "'DM Mono', monospace",
-    }}>
-      <div style={{ fontWeight: 800, marginBottom: 4, color: 'var(--loop-orange)' }}>{label}</div>
-      <div>Current Year: {payload[0]?.value} kg</div>
-      <div style={{ opacity: 0.8 }}>Last Year: {payload[1]?.value} kg</div>
-    </div>
-  );
+const segmentTabs: ('All' | DemographicSegment)[] = ['All', 'Women', 'Youth', 'PWD', 'General'];
+const SEGMENT_COLORS: Record<DemographicSegment, string> = {
+  Women: 'var(--loop-orange)',
+  Youth: 'var(--gold-amber)',
+  PWD: 'var(--sky-blue)',
+  General: 'var(--loop-dark)',
+};
+
+const tooltipStyle = {
+  background: 'var(--loop-dark)',
+  color: '#FFFFFF',
+  border: 'none',
+  borderRadius: 10,
+  fontSize: 12,
+  fontFamily: "'Plus Jakarta Sans', sans-serif",
 };
 
 export default function LoopDashboard() {
+  const { officers, climate, graphLive, cooperatives, registerWalkIn } = usePlatform();
+  const navigate = useNavigate();
+  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
+  const [segment, setSegment] = useState<'All' | DemographicSegment>('All');
+  const [q, setQ] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [intakeOpen, setIntakeOpen] = useState(false);
+  const [toast, setToast] = useState('');
+  const [intake, setIntake] = useState({ phone: '', nationalId: '', cooperativeId: 'C001', cropType: 'Green Tea', acreage: '1', notes: '' });
+
+  const counts = useMemo(() => {
+    const c: Record<ApplicationStatus, number> = {
+      awaiting_climate: 0, ready_for_review: 0, escalated: 0, disbursed: 0,
+    };
+    officers.forEach((f) => { c[f.queueStatus] += 1; });
+    return c;
+  }, [officers]);
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return officers
+      .filter((f) => (statusFilter === 'all' ? true : f.queueStatus === statusFilter))
+      .filter((f) => (segment === 'All' ? true : f.segment === segment))
+      .filter((f) => {
+        if (!term) return true;
+        return f.name.toLowerCase().includes(term)
+          || f.nationalId.toLowerCase().includes(term)
+          || f.memberNumber.toLowerCase().includes(term)
+          || f.phone.replace(/\s/g, '').includes(term.replace(/\s/g, ''));
+      });
+  }, [officers, statusFilter, segment, q]);
+
+  useEffect(() => { setSelectedIndex(0); }, [statusFilter, segment, q]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'j') setSelectedIndex((i) => Math.min(i + 1, Math.max(filtered.length - 1, 0)));
+      if (e.key === 'k') setSelectedIndex((i) => Math.max(i - 1, 0));
+      if (e.key === 'Enter') {
+        const farmer = filtered[selectedIndex];
+        if (farmer) navigate(`/app/loop/scorecard/${farmer.id}`);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [filtered, selectedIndex, navigate]);
+
+  const segmentData = (['Women', 'Youth', 'PWD', 'General'] as DemographicSegment[]).map((s) => ({
+    name: s,
+    value: officers.filter((f) => f.segment === s).length,
+  }));
+
+  const zoneRain = Object.values(climate).map((z) => ({
+    zone: z.zoneName.replace(' Highlands', '').replace(' Plateau', '').replace(' South', ''),
+    mm: z.rainfallMmLast30d,
+    spi: z.spi,
+  }));
+
+  function submitIntake(e: React.FormEvent) {
+    e.preventDefault();
+    void (async () => {
+      try {
+        const farmer = await registerWalkIn({
+          phone: intake.phone,
+          nationalId: intake.nationalId,
+          cooperativeId: intake.cooperativeId,
+          cropType: intake.cropType,
+          acreage: Number(intake.acreage) || 1,
+          notes: intake.notes,
+        });
+        setToast(`${farmer.name} queued — waiting for weather`);
+        setIntake({ phone: '', nationalId: '', cooperativeId: 'C001', cropType: 'Green Tea', acreage: '1', notes: '' });
+        setIntakeOpen(false);
+      } catch (err) {
+        setToast(err instanceof Error ? err.message : 'Could not register farmer');
+      }
+      setTimeout(() => setToast(''), 3200);
+    })();
+  }
+
+  const today = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+
   return (
-    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-      {/* ─── TOP ROW: 3 KEY WIDGETS (Weather, Plant Activity, Hero Banner) ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.1fr 1fr', gap: 20 }}>
-
-        {/* CARD 1: Weather & Tea Plucking Conditions */}
-        <div className="card-clean" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Tea Plucking Weather</div>
-              <h3 style={{ fontSize: '1.25rem', marginTop: 2 }}>Monday</h3>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>(14th August, 2026)</div>
-            </div>
-
-            <div style={{
-              width: 86, height: 86, borderRadius: '50%',
-              background: 'conic-gradient(#FF5F00 0% 75%, #F3F4F6 75% 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: 'inset 0 0 0 10px #FFFFFF',
-              position: 'relative',
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontWeight: 900, fontSize: '0.95rem', color: 'var(--text-main)', lineHeight: 1 }}>25°C</div>
-                <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginTop: 2 }}>High Temp</div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--loop-dark)', lineHeight: 1 }}>
-              29°C
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 3 }}>
-              9.35 sunlight hours · Ideal tea leaf plucking quality
-            </div>
-          </div>
-
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--border-light)',
-            fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 700,
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Wind size={13} color="var(--loop-orange)" /> 0km/h</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Droplets size={13} color="var(--loop-orange)" /> 86% Hum</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Sun size={13} color="var(--gold-amber)" /> 1007hPa</span>
-          </div>
+    <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+      {toast && (
+        <div className="card-clean" style={{ padding: '10px 16px', borderColor: 'var(--loop-orange)', color: 'var(--loop-dark)', fontWeight: 700, fontSize: '0.85rem' }}>
+          {toast}
         </div>
+      )}
 
-        {/* CARD 2: Plant Growth & Delivery Activity */}
-        <div className="card-clean" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-            <div>
-              <h4 style={{ fontSize: '0.95rem' }}>Tea Growth & Delivery Activity</h4>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Plucking cycle milestones</div>
-            </div>
-            <span className="status-pill status-paid" style={{ fontSize: '0.68rem' }}>Weekly</span>
-          </div>
-
-          <div style={{ width: '100%', height: 110, marginTop: 6 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={growthActivity} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                <Line
-                  type="monotone"
-                  dataKey="cm"
-                  stroke="var(--loop-dark)"
-                  strokeWidth={3}
-                  dot={{ fill: 'var(--loop-orange)', r: 6, stroke: 'var(--loop-dark)', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            fontSize: '0.68rem', color: 'var(--text-muted)', fontWeight: 800,
-            marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border-light)',
-          }}>
-            <span>Seed Phase (W1)</span>
-            <span>Final Growth (W3)</span>
-            <span style={{ color: 'var(--loop-orange)' }}>Vegetation (W2)</span>
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--loop-orange)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>{today}</div>
+          <h1 style={{ fontSize: '2rem', marginTop: 4 }}>Today’s loan queue</h1>
+          <p style={{ marginTop: 6, maxWidth: 520 }}>
+            Triage, not underwriting. Open a scorecard to see why — co-op deliveries, chama, peer guarantees, weather — then write a stance the farmer can get by SMS.
+          </p>
+          {graphLive && <span className="live-badge on" style={{ marginTop: 8 }}>Live · Neo4j</span>}
         </div>
-
-        {/* CARD 3: Featured Harvest Visual Banner */}
-        <div style={{
-          position: 'relative', borderRadius: 'var(--radius-lg)', overflow: 'hidden',
-          boxShadow: 'var(--shadow-card)', minHeight: 200,
-        }}>
-          <img
-            src="/hero-farmer.png"
-            alt="Kenyan Tea Farmer"
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(20,26,33,0.1) 0%, rgba(20,26,33,0.85) 100%)',
-            padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-            color: '#FFFFFF',
-          }}>
-            <div style={{
-              background: 'var(--loop-orange)', color: '#FFFFFF',
-              padding: '3px 10px', borderRadius: 99, fontSize: '0.68rem', fontWeight: 800,
-              display: 'inline-block', width: 'fit-content', marginBottom: 6,
-            }}>
-              KENYA TEA BELT
-            </div>
-            <div style={{ fontWeight: 900, fontSize: '1.05rem', lineHeight: 1.25 }}>
-              Kiambu & Nandi High Season
-            </div>
-            <div style={{ fontSize: '0.72rem', opacity: 0.88, marginTop: 4 }}>
-              680,000 Smallholders connected via Loop
-            </div>
-          </div>
-        </div>
-
+        <Link to="/app/loop/phone" style={{ textDecoration: 'none' }}>
+          <button className="btn btn-dark">Open farmer phone <ArrowRight size={14} /></button>
+        </Link>
       </div>
 
-      {/* ─── MAIN ROW: LARGE STACKED BAR CHART & DARK FEATURED CARD ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 20 }}>
-
-        {/* LEFT: Summary of Production & Payout Settlement Chart Card */}
-        <div className="card-clean" style={{ padding: '24px 26px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <div>
-              <h3 style={{ fontSize: '1.2rem' }}>Summary of Production & Payouts</h3>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                Comparing current year vs last year monthly delivery volume (kg)
-              </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        {([
+          ['ready_for_review', counts.ready_for_review],
+          ['awaiting_climate', counts.awaiting_climate],
+          ['escalated', counts.escalated],
+          ['disbursed', counts.disbursed],
+        ] as [ApplicationStatus, number][]).map(([key, value]) => (
+          <button
+            key={key}
+            className="card-clean"
+            onClick={() => setStatusFilter(statusFilter === key ? 'all' : key)}
+            style={{
+              textAlign: 'left', cursor: 'pointer',
+              borderColor: statusFilter === key ? 'var(--loop-orange)' : undefined,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: STATUS_META[key].dot }} />
+              {STATUS_META[key].label}
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: '0.75rem', fontWeight: 700 }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--loop-orange)' }} />
-                  Current Year
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: 'var(--loop-dark)' }} />
-                  Last Year
-                </span>
-              </div>
-
-              <button style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--bg-app)', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                <Sliders size={14} color="var(--text-main)" />
-              </button>
-            </div>
-          </div>
-
-          <div style={{ width: '100%', height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={productionComparison} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="month" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomBarTooltip />} />
-                <Bar dataKey="currentYear" stackId="a" fill="var(--loop-orange)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="lastYear" stackId="a" fill="var(--loop-dark)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* RIGHT: Official LOOP B2C Engine Dark Card */}
-        <div className="card-dark" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{
-              width: '100%', height: 130, borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, #1E2630 0%, #141A21 100%)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              marginBottom: 18, overflow: 'hidden', position: 'relative',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <img
-                src="/hero-coop.png"
-                alt="Cooperative Office"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.5 }}
-              />
-              <div style={{ position: 'absolute', inset: 0, background: 'rgba(20, 26, 33, 0.4)' }} />
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <h3 style={{ color: '#FFFFFF', fontSize: '1.15rem' }}>
-                Lima na Loop B2C Engine
-              </h3>
-              <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: 'var(--loop-orange)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', boxShadow: 'var(--shadow-orange)',
-              }}>
-                <Play size={16} color="#FFFFFF" fill="#FFFFFF" />
-              </div>
-            </div>
-
-            <div style={{ marginTop: 12, marginBottom: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--loop-orange)', fontFamily: "'DM Mono', monospace", marginBottom: 4 }}>
-                <span>18.90 M-Pesa/sec</span>
-                <span>36.00 Peak</span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 99, overflow: 'hidden' }}>
-                <div style={{ width: '65%', height: '100%', background: 'var(--loop-orange)', borderRadius: 99 }} />
-              </div>
-            </div>
-
-            <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.8)', lineHeight: 1.55 }}>
-              Loop B2C automatically calculates factory weights, deducts SACCO loans & levies, and disburses net funds to farmer M-Pesa wallets in under 60 seconds.
-            </p>
-          </div>
-
-          <button className="btn btn-orange" style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
-            <Zap size={15} /> Execute Pending Batches
+            <div className="tabular" style={{ fontSize: '2.2rem', fontWeight: 900, color: 'var(--loop-dark)', marginTop: 8, lineHeight: 1 }}>{value}</div>
           </button>
-        </div>
-
+        ))}
       </div>
 
-      {/* ─── BOTTOM SECTION: FARMER CREDIT SCORE REGISTRY ─── */}
-      <div className="card-clean">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <div>
-            <h3>Farmer Credit Score Registry</h3>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Verified data from cooperatives, chama activity & repayment history</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 18 }}>
+        <div className="card-clean">
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                <TrendingUp size={14} color="var(--loop-orange)" /> Weekly trend
+              </div>
+              <h3 style={{ marginTop: 4 }}>Last 8 weeks</h3>
+            </div>
+            <div style={{ display: 'flex', gap: 12, fontSize: '0.72rem', fontWeight: 700 }}>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 99, background: 'var(--loop-orange)', marginRight: 6 }} />Requested</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 99, background: 'var(--loop-dark)', marginRight: 6 }} />Sent</span>
+            </div>
           </div>
-          <Link to="/app/loop/farmers" style={{ textDecoration: 'none' }}>
-            <button className="btn btn-outline btn-sm">
-              View All Registry <ArrowUpRight size={13} />
-            </button>
-          </Link>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={weeklyTrend} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+              <XAxis dataKey="w" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Area type="monotone" dataKey="requested" stroke="var(--loop-orange)" fill="rgba(255,95,0,0.18)" strokeWidth={2.4} />
+              <Area type="monotone" dataKey="sent" stroke="var(--loop-dark)" fill="rgba(20,26,33,0.12)" strokeWidth={2.4} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.68rem', letterSpacing: '0.06em' }}>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>Farmer</th>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>Cooperative</th>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>County</th>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>Credit Score</th>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>Tier</th>
-                <th style={{ textAlign: 'left', padding: '10px 14px' }}>Loop Status</th>
-                <th style={{ textAlign: 'right', padding: '10px 14px' }}>YTD Earnings</th>
-              </tr>
-            </thead>
-            <tbody>
-              {farmers.map(f => {
-                const coop = cooperatives.find(c => c.id === f.cooperativeId);
-                return (
-                  <tr key={f.id} style={{ borderBottom: '1px solid var(--border-subtle)', transition: 'var(--transition)' }}>
-                    <td style={{ padding: '12px 14px', fontWeight: 800, color: 'var(--text-main)' }}>
-                      <div>{f.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>{f.memberNumber}</div>
-                    </td>
-                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{coop?.shortName}</td>
-                    <td style={{ padding: '12px 14px', color: 'var(--text-secondary)' }}>{f.county}</td>
-                    <td style={{ padding: '12px 14px', fontFamily: "'DM Mono', monospace", fontWeight: 800, color: 'var(--loop-dark)' }}>
-                      {f.creditScore}/100
-                    </td>
-                    <td style={{ padding: '12px 14px' }}>
-                      <span className={`status-pill ${f.creditTier === 'platinum' ? 'status-paid' : f.creditTier === 'gold' ? 'status-pending' : 'status-approved'}`}>
-                        {f.creditTier}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 14px' }}>
-                      <span className={`status-pill ${f.loopAccountStatus === 'active' ? 'status-paid' : 'status-pending'}`}>
-                        {f.loopAccountStatus}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 14px', textAlign: 'right', fontFamily: "'DM Mono', monospace", fontWeight: 800 }}>
-                      {formatKES(f.totalEarnedYTD)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="card-clean">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <Users size={14} color="var(--loop-orange)" /> Who is applying
+          </div>
+          <h3 style={{ marginTop: 4 }}>{officers.length} people</h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 200 }}>
+            <ResponsiveContainer width="55%" height="100%">
+              <PieChart>
+                <Pie data={segmentData} dataKey="value" innerRadius={42} outerRadius={72} paddingAngle={3}>
+                  {segmentData.map((s) => <Cell key={s.name} fill={SEGMENT_COLORS[s.name]} />)}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <ul style={{ listStyle: 'none', flex: 1, fontSize: '0.82rem' }}>
+              {segmentData.map((s) => (
+                <li key={s.name} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 99, background: SEGMENT_COLORS[s.name], marginRight: 8 }} />{s.name}</span>
+                  <span className="tabular" style={{ fontWeight: 800 }}>{s.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
+      <div className="card-clean">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          <CloudRain size={14} color="var(--loop-orange)" /> Rainfall by zone · last 30 days (mm)
+        </div>
+        <ResponsiveContainer width="100%" height={180}>
+          <BarChart data={zoneRain} margin={{ top: 16, right: 8, left: -20, bottom: 0 }}>
+            <XAxis dataKey="zone" tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Bar dataKey="mm" radius={[8, 8, 0, 0]}>
+              {zoneRain.map((z) => (
+                <Cell key={z.zone} fill={z.spi <= -1 ? 'var(--rose-red)' : z.spi <= -0.5 ? 'var(--gold-amber)' : 'var(--loop-orange)'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="card-clean">
+        <button type="button" onClick={() => setIntakeOpen((o) => !o)} style={{ width: '100%', background: 'none', border: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', textAlign: 'left' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--loop-orange-soft)', color: 'var(--loop-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ClipboardPlus size={18} />
+            </div>
+            <div>
+              <h3>Field intake</h3>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Register a walk-in through the same ingest path as USSD</div>
+            </div>
+          </div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--loop-orange)' }}>{intakeOpen ? 'Hide' : 'Open'}</span>
+        </button>
+        {intakeOpen && (
+          <form onSubmit={submitIntake} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 18 }}>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700 }}>Phone<input className="input" required value={intake.phone} onChange={(e) => setIntake({ ...intake, phone: e.target.value })} placeholder="07…" style={{ marginTop: 4 }} /></label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700 }}>National ID<input className="input" value={intake.nationalId} onChange={(e) => setIntake({ ...intake, nationalId: e.target.value })} style={{ marginTop: 4 }} /></label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700 }}>Factory
+              <select className="input" value={intake.cooperativeId} onChange={(e) => setIntake({ ...intake, cooperativeId: e.target.value })} style={{ marginTop: 4 }}>
+                {cooperatives.map((c) => <option key={c.id} value={c.id}>{c.shortName}</option>)}
+              </select>
+            </label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700 }}>Crop / acres
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <input className="input" value={intake.cropType} onChange={(e) => setIntake({ ...intake, cropType: e.target.value })} />
+                <input className="input" type="number" min={0.1} step={0.1} value={intake.acreage} onChange={(e) => setIntake({ ...intake, acreage: e.target.value })} style={{ maxWidth: 90 }} />
+              </div>
+            </label>
+            <label style={{ fontSize: '0.75rem', fontWeight: 700, gridColumn: '1 / -1' }}>Notes<textarea className="input" value={intake.notes} onChange={(e) => setIntake({ ...intake, notes: e.target.value })} rows={2} style={{ marginTop: 4, resize: 'vertical' }} /></label>
+            <button className="btn btn-orange" type="submit" style={{ gridColumn: '1 / -1', justifyContent: 'center' }}>Submit to ingest pipeline</button>
+          </form>
+        )}
+      </div>
+
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+          <div>
+            <h2>Queue</h2>
+            <p>{filtered.length} of {officers.length} farmers · <kbd style={{ border: '1px solid var(--border-light)', borderRadius: 4, padding: '0 5px', fontSize: 11 }}>j</kbd> <kbd style={{ border: '1px solid var(--border-light)', borderRadius: 4, padding: '0 5px', fontSize: 11 }}>k</kbd> · Enter to review</p>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {segmentTabs.map((s) => (
+              <button key={s} className={`filter-pill ${segment === s ? 'active' : ''}`} onClick={() => setSegment(s)}>{s}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          <div className="search-input-pill" style={{ maxWidth: 280 }}>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter this queue…" />
+          </div>
+          <button className={`filter-pill ${statusFilter === 'all' ? 'active' : ''}`} onClick={() => setStatusFilter('all')}>All {officers.length}</button>
+          {(Object.keys(STATUS_META) as ApplicationStatus[]).map((s) => (
+            <button key={s} className={`filter-pill ${statusFilter === s ? 'active' : ''}`} onClick={() => setStatusFilter(s)}>
+              <span style={{ width: 7, height: 7, borderRadius: 99, background: STATUS_META[s].dot }} />
+              {STATUS_META[s].label} {counts[s]}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.map((f, index) => {
+            const coop = cooperatives.find((c) => c.id === f.cooperativeId);
+            const selected = index === selectedIndex;
+            return (
+              <div
+                key={f.id}
+                className="card-clean"
+                style={{
+                  padding: '16px 20px',
+                  display: 'grid',
+                  gridTemplateColumns: '1.4fr 1fr 1fr auto',
+                  gap: 14,
+                  alignItems: 'center',
+                  borderColor: selected ? 'var(--loop-orange)' : undefined,
+                  boxShadow: selected ? '0 0 0 3px rgba(255,95,0,0.15)' : undefined,
+                }}
+              >
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <div style={{
+                    width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+                    background: 'var(--loop-dark)', color: '#FFFFFF', fontWeight: 800,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>{initials(f.name)}</div>
+                  <div>
+                    <Link to={`/app/loop/farmers/${f.id}`} style={{ fontWeight: 800, color: 'var(--text-main)', textDecoration: 'none' }}>{f.name}</Link>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{f.phone} · {f.cropType}</div>
+                  </div>
+                </div>
+                <div>
+                  <span className="status-pill" style={{ background: SEGMENT_META[f.segment].bg, color: SEGMENT_META[f.segment].color }}>{f.segment}</span>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>{coop?.shortName}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{formatRelative(f.submittedIso)}</div>
+                  <div className="tabular" style={{ fontWeight: 900, fontSize: '1.05rem' }}>{formatKES(f.requestedKes)}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-muted)' }}>
+                    <span style={{ width: 7, height: 7, borderRadius: 99, background: STATUS_META[f.queueStatus].dot }} />
+                    {STATUS_META[f.queueStatus].label}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <Link to={`/app/loop/farmers/${f.id}`} style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-outline btn-sm">Profile</button>
+                  </Link>
+                  <Link to={`/app/loop/scorecard/${f.id}`} style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-orange btn-sm">Review <ArrowRight size={12} /></button>
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+          {filtered.length === 0 && (
+            <div className="card-clean" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: 40 }}>No farmers match this filter.</div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

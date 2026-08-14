@@ -2,16 +2,16 @@ import { useTranslation } from "react-i18next";
 
 const TABS = [
   { id: "score", icon: ScoreIcon },
-  { id: "actions", icon: ActionsIcon },
-  { id: "advisory", icon: AdvisoryIcon },
+  { id: "loan", icon: LoanIcon },
+  { id: "improve", icon: ImproveIcon },
 ];
 
 export default function BottomNav({ tab, onChange }) {
   const { t } = useTranslation();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-night/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
-      <ul className="mx-auto grid max-w-md grid-cols-3">
+    <nav className="pointer-events-auto">
+      <ul className="flex items-center justify-around rounded-full bg-black/85 px-2 py-2 shadow-[0_12px_40px_rgba(0,0,0,0.45)] ring-1 ring-white/15 backdrop-blur-xl">
         {TABS.map(({ id, icon: Icon }) => {
           const active = tab === id;
           return (
@@ -19,13 +19,19 @@ export default function BottomNav({ tab, onChange }) {
               <button
                 type="button"
                 onClick={() => onChange(id)}
-                className={`tap flex w-full flex-col items-center justify-center gap-1 py-2.5 text-[11px] font-semibold ${
-                  active ? "text-ember" : "text-mute"
+                aria-current={active ? "page" : undefined}
+                className={`flex min-h-12 min-w-16 flex-col items-center justify-center gap-0.5 px-3 py-1 text-[10px] font-semibold ${
+                  active ? "text-white" : "text-white/45"
                 }`}
               >
-                <Icon />
+                <span
+                  className={`flex h-9 w-9 items-center justify-center rounded-full ${
+                    active ? "bg-white text-black" : ""
+                  }`}
+                >
+                  <Icon />
+                </span>
                 {t(`nav.${id}`)}
-                <span className={`h-1 w-1 rounded-full ${active ? "bg-ember" : "bg-transparent"}`} />
               </button>
             </li>
           );
@@ -37,26 +43,27 @@ export default function BottomNav({ tab, onChange }) {
 
 function ScoreIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
       <path d="M12 8v4l2.5 1.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
-function ActionsIcon() {
+function LoanIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M5 7h14M5 12h14M5 17h9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="4" y="7" width="16" height="11" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M8 7V6a4 4 0 0 1 8 0v1" stroke="currentColor" strokeWidth="1.8" />
     </svg>
   );
 }
 
-function AdvisoryIcon() {
+function ImproveIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
-        d="M4 18 L10 9 L15 14 L20 6"
+        d="M5 16 L10 10 L14 13 L19 6"
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"

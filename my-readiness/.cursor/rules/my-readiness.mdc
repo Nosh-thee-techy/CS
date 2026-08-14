@@ -10,21 +10,21 @@ Lookup by member number, phone, or national ID. Stateless per visit.
 
 ## This repo owns
 
-- Display-ready readiness UI (Score / Actions / Advisory)
+- Display-ready readiness UI (Score / Loan / Improve)
 - Localization (en, sw; more later via i18n keys — never hardcode copy)
 - Action self-report forwarding
 - Kali voice greeting playback for the selected locale
 
 ## This repo does NOT own
 
-- Scoring, Neo4j, or action ranking — call the core platform internal API
+- Scoring or action ranking — call the core platform internal API
 - Officer / field-verification tooling
 - Auth or sessions
 
 ## Architecture
 
 Frontend → this backend (`/api/readiness/...`) → core platform (`/internal/...`).
-Never talk to Neo4j or any DB from this service. Shape and localize only.
+Never talk to a database from this service. Shape and localize only.
 
 Until `CORE_PLATFORM_API_URL` is set, use the mock client in
 `backend/src/clients/corePlatform.js`. Do not invent a local scoring algorithm.
@@ -32,6 +32,8 @@ Until `CORE_PLATFORM_API_URL` is set, use the mock client in
 ## Product rules
 
 - Self-report does **not** change the score. Copy must say so.
+- No nested phone mockup. Score is a flat card.
+- Loan amount is server-calculated and read-only.
 - Verified = officer confirmed; pending = self-reported or not yet confirmed.
 - Mobile-first, thumb-sized targets, bottom tab nav, skeleton loaders, cache last profile.
 

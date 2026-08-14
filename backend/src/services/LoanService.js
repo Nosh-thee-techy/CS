@@ -1,10 +1,11 @@
 import { collection, doc, getDoc, getDocs, limit, query, setDoc, updateDoc, where, orderBy } from 'firebase/firestore';
-import { db } from '../config/firebase.js';
+import { db, isFirebaseReady } from '../config/firebase.js';
 import { v4 as uuidv4 } from 'uuid';
 import CreditEngineService from './CreditEngineService.js';
 import LoopAdapter from './LoopAdapter.js';
 import FarmerService from './FarmerService.js';
 import env from '../config/env.js';
+import demo from '../data/demoStore.js';
 
 const LOANS_COLLECTION = 'loans';
 
@@ -21,7 +22,26 @@ class LoanService {
    * @param {object} data - { farmerId, cooperativeId, requestedAmount }
    * @returns {object} Created loan record
    */
-  async requestLoan({ farmerId, cooperativeId, requestedAmount }) {
+  async requestLoan({ farmerId, cooperativeId, requestedAmount, purpose }) {
+    if (!isFirebaseReady()) {
+      const creditProfile = await CreditEngineService.getCreditProfile(farmerId);
+      const farmer = await FarmerService.getFarmerById(farmerId);
+      const loan = {
+        loanId: `LN-${Date.now()}`,
+        farmerId,
+        farmerName: farmer.fullName,
+        cooperativeId,
+        requestedAmount,
+        approvedAmount: 0,
+        outstandingBalance: 0,
+        purpose: purpose || null,
+        status: 'PENDING',
+        creditScoreAtRequest: creditProfile.score,
+        createdAt: new Date().toISOString(),
+      };
+      demo.addLoan(loan);
+      return { loan, creditProfile };
+    }
     // 1. Get / calculate credit profile
     const creditProfile = await CreditEngineService.calculateCreditScore(farmerId);
 
@@ -59,6 +79,7 @@ class LoanService {
       farmerId,
       cooperativeId,
       requestedAmount,
+      purpose: purpose || null,
       approvedAmount: 0,
       outstandingBalance: 0,
       status: 'PENDING',
@@ -80,6 +101,27 @@ class LoanService {
    * @param {number} [approvedAmount] - Amount approved (defaults to requested amount)
    */
   async processLoanDecision(loanId, action, approvedAmount = null) {
+    if (!isFirebaseReady()) {
+      const loan = demo.processLoanDecision(loanId, action, approvedAmount);
+      if (!loan) {
+        const err = new Error('Loan not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      if (action === 'REJECT') return loan;
+      const farmer = await FarmerService.getFarmerById(loan.farmerId);
+      const loopResult = await LoopAdapter.disburseLoan({
+        farmerId: loan.farmerId,
+        phone: farmer.phoneNumber,
+        amount: loan.approvedAmount,
+        loanId,
+      });
+      if (loopResult?.transactionRef) {
+        loan.loopTransactionRef = loopResult.transactionRef;
+      }
+      return { ...loan, loopResult };
+    }
+
     const docRef = doc(db, LOANS_COLLECTION, loanId);
     const docSnap = await getDoc(docRef);
 
@@ -91,7 +133,13 @@ class LoanService {
 
     const loan = docSnap.data();
 
-    if (loan.status !== 'PENDING') {
+    if (!['PENDING', 'APPROVED'].includes(loan.status) && action === 'APPROVE') {
+      const err = new Error(`Loan is already ${loan.status}. Only PENDING or APPROVED loans can be processed.`);
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (loan.status !== 'PENDING' && action === 'REJECT') {
       const err = new Error(`Loan is already ${loan.status}. Only PENDING loans can be processed.`);
       err.statusCode = 400;
       throw err;
@@ -135,6 +183,15 @@ class LoanService {
    * Get a loan by ID.
    */
   async getLoanById(loanId) {
+    if (!isFirebaseReady()) {
+      const loan = demo.getLoan(loanId);
+      if (!loan) {
+        const err = new Error('Loan not found.');
+        err.statusCode = 404;
+        throw err;
+      }
+      return loan;
+    }
     const docSnap = await getDoc(doc(db, LOANS_COLLECTION, loanId));
     if (!docSnap.exists()) {
       const err = new Error('Loan not found.');
@@ -148,6 +205,9 @@ class LoanService {
    * Get all loans for a farmer.
    */
   async getLoansByFarmer(farmerId) {
+    if (!isFirebaseReady()) {
+      return demo.listLoans(farmerId);
+    }
     const snapshot = await getDocs(
       query(
         collection(db, LOANS_COLLECTION),
@@ -162,6 +222,9 @@ class LoanService {
    * Get all loans for a cooperative.
    */
   async getLoansByCooperative(cooperativeId) {
+    if (!isFirebaseReady()) {
+      return demo.listLoansByCooperative(cooperativeId);
+    }
     const snapshot = await getDocs(
       query(
         collection(db, LOANS_COLLECTION),
@@ -180,6 +243,9 @@ class LoanService {
    * @param {number} amount - Amount to deduct from outstanding balance
    */
   async reduceOutstandingBalance(loanId, amount) {
+    if (!isFirebaseReady()) {
+      return demo.reduceLoanBalance(loanId, amount);
+    }
     const docRef = doc(db, LOANS_COLLECTION, loanId);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) return;
@@ -200,6 +266,9 @@ class LoanService {
    * Get active (disbursed, non-repaid) loans for a farmer.
    */
   async _getActiveLoans(farmerId) {
+    if (!isFirebaseReady()) {
+      return demo.listLoans(farmerId).filter((loan) => loan.status === 'DISBURSED');
+    }
     const snapshot = await getDocs(
       query(
         collection(db, LOANS_COLLECTION),
@@ -239,16 +308,7 @@ class LoanService {
       txnReference = null,
     } = {}
   ) {
-    const docRef = doc(db, LOANS_COLLECTION, loanId);
-    const docSnap = await getDoc(docRef);
-
-    if (!docSnap.exists()) {
-      const err = new Error('Loan not found.');
-      err.statusCode = 404;
-      throw err;
-    }
-
-    const loan = docSnap.data();
+    const loan = await this.getLoanById(loanId);
     const farmer = mobileNo ? { phoneNumber: mobileNo } : await FarmerService.getFarmerById(loan.farmerId);
     const promptAmount = Number(amount ?? loan.outstandingBalance ?? loan.requestedAmount ?? 0);
 
@@ -262,14 +322,27 @@ class LoanService {
       reason ||
       `Loan repayment for loan ${loan.loanId} at cooperative ${loan.cooperativeId}`;
 
-    const result = await LoopAdapter.promptLoanRepayment({
-      merchantTill: merchantTill || env.LOOP_MERCHANT_TILL,
-      mobileNo: farmer.phoneNumber,
-      amount: promptAmount,
-      reason: promptReason,
-      callBackUrl: callBackUrl || env.LOOP_REPAYMENT_CALLBACK_URL || env.LOOP_CALLBACK_URL,
-      txnReference,
-    });
+    const resolvedCallback =
+      callBackUrl || env.LOOP_REPAYMENT_CALLBACK_URL || 'https://cs-fork.onrender.com/api/loans/loop-repayment-callback';
+
+    let result;
+    try {
+      result = await LoopAdapter.promptLoanRepayment({
+        merchantTill: merchantTill || env.LOOP_MERCHANT_TILL,
+        mobileNo: farmer.phoneNumber,
+        amount: promptAmount,
+        reason: promptReason,
+        callBackUrl: resolvedCallback,
+        txnReference,
+      });
+    } catch (error) {
+      result = {
+        success: !isFirebaseReady(),
+        txnReference: txnReference || `SIM-RTP-${Date.now()}`,
+        message: error.message,
+        rawResponse: { demo: !isFirebaseReady(), error: error.message },
+      };
+    }
 
     const promptRecord = {
       repaymentPromptTxnReference: result.txnReference,
@@ -282,7 +355,11 @@ class LoanService {
       repaymentPromptLastResponse: result.rawResponse,
     };
 
-    await updateDoc(docRef, promptRecord);
+    if (isFirebaseReady()) {
+      await updateDoc(doc(db, LOANS_COLLECTION, loanId), promptRecord);
+    } else {
+      demo.recordRepaymentPrompt(loanId, promptRecord);
+    }
 
     return {
       loanId,
@@ -303,6 +380,39 @@ class LoanService {
       const err = new Error('Missing transaction reference in LOOP repayment callback.');
       err.statusCode = 400;
       throw err;
+    }
+
+    if (!isFirebaseReady()) {
+      const loan = demo.findLoanByPromptRef(parsed.txnReference);
+      if (!loan) return { acknowledged: true, found: false };
+      if (
+        loan.repaymentPromptStatus === 'COMPLETED' &&
+        loan.repaymentPromptCallbackTxnReference === parsed.txnReference
+      ) {
+        return { acknowledged: true, found: true, loanId: loan.loanId, alreadyProcessed: true };
+      }
+      const updates = {
+        repaymentPromptStatus: parsed.isSuccess ? 'COMPLETED' : 'FAILED',
+        repaymentPromptCallbackTxnReference: parsed.txnReference,
+        repaymentPromptCallbackReceivedAt: new Date().toISOString(),
+        repaymentPromptCallbackPayload: parsed.rawPayload,
+        repaymentPromptCallbackMessage: parsed.message,
+      };
+      demo.recordRepaymentPrompt(loan.loanId, updates);
+      if (parsed.isSuccess) {
+        const repaymentAmount =
+          parsed.amount > 0 ? parsed.amount : loan.repaymentPromptAmount || loan.outstandingBalance || 0;
+        if (repaymentAmount > 0) {
+          await this.reduceOutstandingBalance(loan.loanId, repaymentAmount);
+        }
+      }
+      return {
+        acknowledged: true,
+        found: true,
+        loanId: loan.loanId,
+        repaymentStatus: updates.repaymentPromptStatus,
+        transactionRef: parsed.txnReference,
+      };
     }
 
     const snapshot = await getDocs(

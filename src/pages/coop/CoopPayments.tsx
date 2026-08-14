@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { paymentBatches, formatKES } from '../../lib/mockData';
+import { formatKES } from '../../lib/mockData';
 import type { PaymentStatus } from '../../lib/mockData';
-import { Zap, CheckCircle2, Clock, AlertCircle, Users, Building2 } from 'lucide-react';
+import { Zap, CheckCircle2, Clock, AlertCircle, Users } from 'lucide-react';
+import { usePlatform } from '../../lib/PlatformContext';
+import { api } from '../../lib/api';
 
 const stages: { status: PaymentStatus; label: string; color: string; icon: React.ReactNode }[] = [
   { status: 'pending', label: 'Pending Approval', color: 'var(--text-muted)', icon: <Clock size={13} /> },
@@ -11,12 +13,29 @@ const stages: { status: PaymentStatus; label: string; color: string; icon: React
 ];
 
 export default function CoopPayments() {
+  const { paymentBatches, refresh } = usePlatform();
   const [active, setActive] = useState<PaymentStatus | 'all'>('all');
+  const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
   const myBatches = paymentBatches.filter(b => b.cooperativeId === 'C001');
   const visible = active === 'all' ? myBatches : myBatches.filter(b => b.status === active);
 
   const pendingTotal = myBatches.filter(b => b.status === 'pending').reduce((a, b) => a + b.totalAmount, 0);
   const approvedBatches = myBatches.filter(b => b.status === 'approved');
+
+  async function runBulk() {
+    setBusy('bulk');
+    setNotice('');
+    try {
+      await api.bulkPayout('C001');
+      await refresh();
+      setNotice('Bulk payout sent for Kiambu SACCO.');
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : 'Bulk payout failed');
+    } finally {
+      setBusy('');
+    }
+  }
 
   return (
     <div className="animate-fade" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -27,6 +46,9 @@ export default function CoopPayments() {
         </div>
         <button className="btn btn-orange">+ Create New Batch</button>
       </div>
+      {notice && (
+        <div className="card-clean" style={{ fontWeight: 700, fontSize: '0.85rem' }}>{notice}</div>
+      )}
 
       {pendingTotal > 0 && (
         <div className="card-clean" style={{
@@ -40,8 +62,8 @@ export default function CoopPayments() {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}> pending approval across {myBatches.filter(b => b.status === 'pending').length} settlement batches.</span>
           </div>
           {approvedBatches.length > 0 && (
-            <button className="btn btn-orange btn-sm">
-              <Zap size={13} /> Execute Approved Batches
+            <button className="btn btn-orange btn-sm" disabled={Boolean(busy)} onClick={() => void runBulk()}>
+              <Zap size={13} /> {busy === 'bulk' ? 'Sending…' : 'Execute Approved Batches'}
             </button>
           )}
         </div>
@@ -122,7 +144,9 @@ export default function CoopPayments() {
                       <button className="btn btn-dark btn-sm"><CheckCircle2 size={12} /> Approve Batch</button>
                     )}
                     {batch.status === 'approved' && (
-                      <button className="btn btn-orange btn-sm"><Zap size={12} /> Disburse via Loop</button>
+                      <button className="btn btn-orange btn-sm" disabled={Boolean(busy)} onClick={() => void runBulk()}>
+                        <Zap size={12} /> {busy ? 'Sending…' : 'Disburse via Loop'}
+                      </button>
                     )}
                     {batch.status === 'paid' && (
                       <button className="btn btn-outline btn-sm">Statement</button>

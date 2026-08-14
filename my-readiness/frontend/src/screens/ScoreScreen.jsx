@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import MountainScene from "../components/MountainScene.jsx";
 import BandBadge from "../components/BandBadge.jsx";
 import VoiceGreeting from "../components/VoiceGreeting.jsx";
 import { useReadiness } from "../context/ReadinessContext.jsx";
@@ -9,6 +10,13 @@ export default function ScoreScreen() {
   const { profile, fromCache, reset } = useReadiness();
 
   if (!profile) return null;
+
+  const updated = profile.lastUpdated
+    ? new Intl.DateTimeFormat(i18n.language.startsWith("sw") ? "sw-KE" : "en-KE", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(profile.lastUpdated))
+    : null;
 
   return (
     <div className="space-y-5">
@@ -23,34 +31,68 @@ export default function ScoreScreen() {
       </header>
 
       {fromCache && (
-        <p className="rounded-full bg-ember/15 px-3 py-2 text-sm font-medium text-ember-glow">
+        <p className="rounded-2xl border border-ember/40 bg-ember/15 px-3 py-2 text-sm font-medium text-ember-glow">
           {t("score.offline")}
         </p>
       )}
 
-      <section className="relative overflow-hidden rounded-[28px]">
-        <img src="/brand/hero-lower.jpg" alt="" className="h-80 w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/15" />
-        <div className="orange-glow pointer-events-none absolute inset-0" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+      <section className="relative overflow-hidden rounded-[28px] border border-white/15">
+        <MountainScene className="absolute inset-0 h-full w-full" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/25" />
+        <div className="relative z-10 flex flex-col items-center px-4 py-10 text-center">
           <p className="text-sm font-medium text-white/70">{t("score.yourScore")}</p>
-          <p className="mt-1 text-7xl font-bold tracking-tight text-white">{profile.score}</p>
-          <div className="mt-3">
+          <p className="mt-1 text-7xl font-bold leading-none tracking-tight text-white">{profile.score}</p>
+          <div className="mt-4">
             <BandBadge bandKey={profile.bandKey} label={profile.band} />
           </div>
         </div>
       </section>
 
-      <img src="/brand/themes.jpg" alt="" className="w-full rounded-[24px] object-cover" />
+      {updated && (
+        <p className="text-center text-xs text-mute">
+          {t("score.updated")}: {updated}
+        </p>
+      )}
 
-      <VoiceGreeting text={profile.voiceGreetingText} locale={i18n.language} />
+      <article className="overflow-hidden rounded-[24px] border border-white/15 bg-panel">
+        <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-ember/20 text-ember-glow">
+            <CloudIcon />
+          </span>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mute">{t("score.climate")}</p>
+            <p className="text-sm font-semibold text-white">{t("score.climateStay")}</p>
+          </div>
+        </div>
+        <p className="px-4 py-4 text-[16px] leading-relaxed text-white">{profile.climateAdvisory}</p>
+      </article>
 
-      <section className="panel p-4">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-mute">{t("score.why")}</h2>
-        <p className="mt-2 text-[16px] leading-relaxed text-white/85">{profile.why}</p>
-      </section>
+      <article className="overflow-hidden rounded-[24px] border border-white/10 bg-panel">
+        <div className="flex gap-3 p-4">
+          <span className="mt-0.5 w-1 shrink-0 rounded-full bg-ember" />
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mute">{t("score.why")}</p>
+            <p className="mt-2 text-[16px] leading-relaxed text-white/90">{profile.why}</p>
+          </div>
+        </div>
+      </article>
 
       <StrengthsGaps strengths={profile.strengths} gaps={profile.gaps} />
+
+      <VoiceGreeting text={profile.voiceGreetingText} locale={i18n.language} />
     </div>
+  );
+}
+
+function CloudIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M7 17h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.5A3.5 3.5 0 0 0 7 17Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

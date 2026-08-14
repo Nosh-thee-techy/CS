@@ -7,21 +7,29 @@ const LOCALES = [
 ];
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-  const current = LOCALES.find((locale) => i18n.language.startsWith(locale.id)) || LOCALES[0];
-  const next = LOCALES.find((locale) => locale.id !== current.id);
+  const { t, i18n } = useTranslation();
 
   return (
-    <button
-      type="button"
-      onClick={() => persistLocale(next.id)}
-      className="glass-pill tap inline-flex items-center gap-1.5 px-3 py-2"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M3 12h18M12 3c2.5 3 3.8 6 3.8 9s-1.3 6-3.8 9c-2.5-3-3.8-6-3.8-9S9.5 6 12 3Z" stroke="currentColor" strokeWidth="1.6" />
-      </svg>
-      {current.label}
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <p className="text-[11px] font-medium text-mute">{t("lookup.languageAsk")}</p>
+      <div className="flex rounded-full border border-white/20 bg-white/5 p-0.5" role="group" aria-label={t("lookup.language")}>
+        {LOCALES.map((locale) => {
+          const active = i18n.language.startsWith(locale.id);
+          return (
+            <button
+              key={locale.id}
+              type="button"
+              aria-pressed={active}
+              onClick={() => persistLocale(locale.id)}
+              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                active ? "bg-white text-black" : "text-white/70"
+              }`}
+            >
+              {locale.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }

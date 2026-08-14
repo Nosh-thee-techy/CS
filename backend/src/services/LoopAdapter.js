@@ -339,8 +339,16 @@ class LoopAdapter {
    */
   parseWebhookPayload(payload) {
     return {
-      transactionRef: payload.reference || payload.refNo || payload.transactionId || null,
-      status: payload.status || (payload.code === '200' ? 'COMPLETED' : 'FAILED'),
+      transactionRef:
+        payload.txnReference ||
+        payload.reference ||
+        payload.refNo ||
+        payload.transactionId ||
+        null,
+      status:
+        payload.serviceTransactionStatus ||
+        payload.status ||
+        (payload.statusCode === 200 || payload.code === '200' ? 'COMPLETED' : 'FAILED'),
       amount: payload.amount || 0,
       recipientPhone: payload.phoneNumber || payload.recipientNo || null,
       timestamp: payload.timestamp || new Date().toISOString(),

@@ -17,43 +17,33 @@ and see exactly what to do to improve it.
 - Lives on its own **subdomain**, e.g. `readiness.<platform-domain>.co.ke`
 - Sits alongside (not replacing) the officer dashboard and USSD channel
 
-**Explicitly out of scope for this repo:**
-- No Neo4j / graph scoring logic lives here — scoring is owned by the **core
-  platform Node backend**, which is being built separately by another workstream.
-- No officer/field-verification tooling — that's a different app.
-- No authentication/session system — lookup is by member number, phone, or
-  national ID; the page is stateless per visit.
+- Explicitly out of scope for this frontend: scoring math, officer tooling, auth.
+  Those live in `backend/` (Agricultural Credit Platform).
 
 ---
 
 ## 2. Architecture — where this repo fits
 
 ```
-┌─────────────────────────────┐
-│   MY READINESS FRONTEND      │   ← this repo (subdomain, app-like UI)
-│   readiness.<domain>.co.ke   │
-└──────────────┬────────────────┘
-               │ calls
-               ▼
-┌─────────────────────────────┐
-│   MY READINESS BACKEND       │   ← this repo (thin Node/Express service)
-│   - lookup routing            │
-│   - localization              │
-│   - action self-report        │
-│   - Kali voice greeting        │
-└──────────────┬────────────────┘
-               │ calls (internal API, not direct DB access)
-               ▼
-┌─────────────────────────────┐
-│   CORE PLATFORM BACKEND      │   ← built separately, NOT in this repo
-│   (Node, owns scoring logic,  │
-│    Neo4j graph, action ranking)│
-└─────────────────────────────┘
+┌─────────────────────────────┐     ┌──────────────────────────┐
+│   MY READINESS FRONTEND      │     │  FEATURE PHONE (USSD)    │
+│   readiness.<domain>.co.ke   │     │  *384*XXXX# via AT       │
+└──────────────┬───────────────┘     └────────────┬─────────────┘
+               │ /api/readiness, /api/otp          │ POST /api/ussd
+               ▼                                   ▼
+┌─────────────────────────────────────────────────────────────┐
+│   CORE PLATFORM BACKEND  (Express :3000)                     │
+│   farmers, produce, credit, loans, payouts                   │
+│   + readiness shape/localize                                 │
+│   + Africa's Talking USSD session + SMS OTP                  │
+│   + Firebase Client SDK (Firestore under security rules)     │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Key rule:** this backend is a **consumer**, not an owner, of scoring data.
-It never talks to Neo4j directly. It calls the core platform's internal API
-and shapes the response for the frontend.
+**Key rule:** scoring is owned by `CreditEngineService` in this backend.
+The readiness routes only look up the farmer, map the 300–850 credit score
+to the 0–100 farmer display, and localize. Demo member numbers still work
+when Firebase is unset or the farmer is not registered yet.
 
 ---
 
@@ -127,27 +117,22 @@ and shapes the response for the frontend.
 }
 
 // POST /api/readiness/:lookup/actions/:actionId/complete
+// multipart/form-data: optional photo, audio, note.
 // Self-report only. Forwards the completion to the core platform,
 // which queues it for field officer verification. Does not alter score.
 ```
 
 ---
 
-## 6. What we expect from the core platform's internal API
+## 6. Core platform (this monorepo)
 
-This backend depends on the core platform exposing (confirm exact contract
-with that team before building against it):
+Readiness routes are mounted on the Agricultural Credit Platform API in
+`backend/`. `ReadinessService` looks up the farmer in Firestore, reads
+`CreditEngineService` / `LoanService`, and maps that into the display payload
+above. Scoring stays in the credit engine (300–850 → 0–100 for the farmer UI).
 
-```
-GET  /internal/farmer/:lookup/score        → raw score + signal breakdown
-GET  /internal/farmer/:lookup/actions      → ranked action list (Featherless AI or rule-based fallback)
-POST /internal/farmer/:lookup/actions/:id/complete   → logs self-report, queues for officer verification
-GET  /internal/zone/:zoneId/advisory       → climate advisory text
-```
-
-> **Action item:** confirm these routes/payloads with whoever owns the core
-> platform backend before wiring this up — treat the shapes above as a draft
-> contract, not a guarantee.
+Demo lookups (`KTDA-43456789`, `0712345678`, `12345678`) still work when
+Firebase is unset or the member is not registered yet.
 
 ---
 
@@ -200,11 +185,19 @@ my-readiness/
 
 ---
 
-## 10. Environment variables (backend)
+## 10. Environment variables (core platform `backend/.env`)
 
 ```
-CORE_PLATFORM_API_URL=       # base URL for the core platform's internal API
-CORE_PLATFORM_API_KEY=       # if the internal API requires auth
+PORT=3000
+FIREBASE_API_KEY=
+FIREBASE_AUTH_DOMAIN=
+FIREBASE_PROJECT_ID=
+FIREBASE_APP_ID=
+FIREBASE_AUTH_EMAIL=          # optional backend Auth user (not a service account)
+FIREBASE_AUTH_PASSWORD=
+AT_USERNAME=sandbox
+AT_API_KEY=
+AT_CALLBACK_SECRET=
 DEFAULT_LOCALE=en
-PORT=
+FEATHERLESS_API_KEY=         # optional, dynamic why/how/impact translation
 ```

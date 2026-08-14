@@ -4,6 +4,7 @@ import produceRoutes from './produceRoutes.js';
 import creditRoutes from './creditRoutes.js';
 import loanRoutes from './loanRoutes.js';
 import payoutRoutes from './payoutRoutes.js';
+import platformRoutes from './platformRoutes.js';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/produce', produceRoutes);
 router.use('/credit', creditRoutes);
 router.use('/loans', loanRoutes);
 router.use('/payouts', payoutRoutes);
+router.use('/platform', platformRoutes);
 
 export default router;
